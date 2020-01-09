@@ -2,14 +2,18 @@ import React from 'react';
 
 import Button from 'react-bootstrap/Button';
 
-const Game = ({ gameName, players, host }) => {
+const Game = ({ name, playerCount, host, maxPlayers }) => {
   return (
     <tr>
-      <td>{gameName}</td>
-      <td>{players}/4</td>
+      <td>{name}</td>
+      <td>
+        {playerCount}/{maxPlayers}
+      </td>
       <td>{host}</td>
       <td>
-        <Button variant="success">Join Game</Button>
+        <Button style={{ width: '100%' }} variant="success">
+          Join Game
+        </Button>
       </td>
     </tr>
   );

@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import socket from '../../socket.io/socketConnection';
 
 import Table from 'react-bootstrap/Table';
 
 import Game from '../game/game';
 
 const Games = () => {
+  const [availableGames, setAvailableGames] = useState([]);
+  useEffect(() => {
+    socket.emit('requestAvailableGames');
+    socket.on('availableGames', data => {
+      console.log(data);
+      setAvailableGames(data);
+    });
+  }, []);
   return (
     <Table striped bordered hover variant="dark">
       <thead>
@@ -16,8 +25,9 @@ const Games = () => {
         </tr>
       </thead>
       <tbody>
-        <Game gameName="Test Game" players={2} host="snader" />
-        <Game gameName="Juden" players={3} host="snosk" />
+        {availableGames.map(({ roomId, ...props }) => (
+          <Game key={roomId} {...props} />
+        ))}
       </tbody>
     </Table>
   );

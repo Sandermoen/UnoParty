@@ -5,8 +5,16 @@ const gamesSchema = new Schema({
   playerCount: Number,
   maxPlayers: Number,
   name: String,
-  host: String,
-  passwordProtected: Boolean
+  host: Object,
+  passwordProtected: {
+    type: Boolean,
+    default: false
+  },
+  roomId: Number,
+  players: {
+    type: Array,
+    default: []
+  }
 });
 
 const gamesModel = mongoose.model('games', gamesSchema);

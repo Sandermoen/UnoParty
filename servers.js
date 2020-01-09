@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const socketio = require('socket.io');
 const apiRouter = require('./api/api');
 const mongoose = require('mongoose');
-const Games = require('./models/Games');
 
 const PORT = process.env.PORT || 9000;
 const app = express();
