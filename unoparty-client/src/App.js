@@ -7,6 +7,7 @@ import './App.styles.css';
 
 import Logo from './components/logo/logo';
 import GameBrowserPage from './pages/gameBrowserPage/gameBrowserPage';
+import GameLobbyPage from './pages/gameLobbyPage/gameLobbyPage';
 
 function App() {
   return (
@@ -15,6 +16,9 @@ function App() {
       <Switch>
         <Route exact path="/">
           <GameBrowserPage />
+        </Route>
+        <Route path="/lobby">
+          <GameLobbyPage />
         </Route>
       </Switch>
     </Container>

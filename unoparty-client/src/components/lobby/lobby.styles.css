@@ -1,0 +1,19 @@
+.lobby {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: white;
+}
+
+.lobby-name {
+  text-align: center;
+}
+
+.lobby-players {
+  justify-content: center;
+}
+
+.lobby-details {
+  text-align: center;
+}
