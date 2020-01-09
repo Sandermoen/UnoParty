@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { ReactComponent as UnoPartyLogo } from '../../assets/svg/logo.svg';
+
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
@@ -9,7 +11,7 @@ const Logo = () => {
   return (
     <Row className="logo">
       <Col lg="6">
-        <h1>UnoParty</h1>
+        <UnoPartyLogo className="logo-svg" />
       </Col>
     </Row>
   );
