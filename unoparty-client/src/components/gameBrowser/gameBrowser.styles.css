@@ -1,0 +1,10 @@
+.game-browser {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.game-browser-title {
+  color: white;
+}

@@ -1,0 +1,21 @@
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: rgb(54, 54, 54);
+}
+
+#root {
+  min-height: 100%;
+}
+
+.app {
+  height: 100%;
+}
+
+h1,
+p {
+  margin-bottom: 0;
+}
