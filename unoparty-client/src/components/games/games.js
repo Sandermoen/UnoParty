@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
 import socket from '../../socket.io/socketConnection';
+
+import { selectAvailableGames } from '../../redux/games/games.selectors';
 
 import Table from 'react-bootstrap/Table';
 
 import Game from '../game/game';
 
-const Games = () => {
-  const [availableGames, setAvailableGames] = useState([]);
+const Games = ({ availableGames }) => {
   useEffect(() => {
     socket.emit('requestAvailableGames');
-    socket.on('availableGames', data => {
-      console.log(data);
-      setAvailableGames(data);
-    });
   }, []);
   return (
     <Table striped bordered hover variant="dark">
@@ -26,11 +25,15 @@ const Games = () => {
       </thead>
       <tbody>
         {availableGames.map(({ roomId, ...props }) => (
-          <Game key={roomId} {...props} />
+          <Game key={roomId} roomId={roomId} {...props} />
         ))}
       </tbody>
     </Table>
   );
 };
 
-export default Games;
+const mapStateToProps = createStructuredSelector({
+  availableGames: selectAvailableGames
+});
+
+export default connect(mapStateToProps)(Games);

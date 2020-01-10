@@ -5,7 +5,8 @@ const gamesSchema = new Schema({
   playerCount: Number,
   maxPlayers: Number,
   name: String,
-  host: Object,
+  host: String,
+  hostSocket: String,
   passwordProtected: {
     type: Boolean,
     default: false

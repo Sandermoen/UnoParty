@@ -1,0 +1,14 @@
+.player-avatar {
+  padding: 20px;
+  border-radius: 100%;
+  background-color: white;
+  color: black;
+  width: 70px;
+  margin: 5px;
+}
+
+.player-avatar span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

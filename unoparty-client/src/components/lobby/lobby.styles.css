@@ -11,7 +11,9 @@
 }
 
 .lobby-players {
+  display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .lobby-details {

@@ -1,73 +1,105 @@
 const { io } = require('../servers');
-const Games = require('../models/Games');
+
+let currentGames = [];
 
 const sendMessage = (message, error, socket) => {
-  socket.emit(error ? 'error' : 'message', message);
+  socket.emit(error ? 'errorMessage' : 'message', message);
 };
 
-const sendAvailableGames = socket => {
-  Games.find({}, (err, games) => {
-    if (err) return err;
-    if (games) {
-      io.emit(
-        'availableGames',
-        games.map(
-          ({
-            playerCount,
-            maxPlayers,
-            name,
-            passwordProtected,
-            host,
-            roomId
-          }) => {
-            return {
-              roomId,
-              playerCount,
-              maxPlayers,
-              name,
-              passwordProtected,
-              host: host.name
-            };
-          }
-        )
-      );
-    }
-  });
+const sendAvailableGames = () => {
+  const availableGames = currentGames.map(
+    ({ playerCount, maxPlayers, name, passwordProtected, host, roomId }) => ({
+      roomId,
+      playerCount,
+      maxPlayers,
+      name,
+      passwordProtected,
+      host
+    })
+  );
+  io.emit('availableGames', availableGames);
 };
 
 io.on('connect', socket => {
-  console.log('a client has connected');
+  console.log('a client has connected', socket.id);
   socket.on('requestAvailableGames', () => {
-    sendAvailableGames(socket);
+    sendAvailableGames();
   });
 
-  socket.on('createGame', async ({ maxPlayers, name, host }) => {
+  socket.on('createGame', ({ maxPlayers, name, host }) => {
     if (!maxPlayers || !name || !host)
       return sendMessage('Please provide all the info needed', true, socket);
     const roomId = `${Math.floor(Math.random() * 9999) + 1}`;
     const gameSettings = {
+      passwordProtected: false,
       playerCount: 1,
       maxPlayers,
       name,
       roomId,
+      inLobby: true,
+      host,
       players: [
         {
-          name: 'snader',
-          cards: [],
+          name: host,
+          cards: 0,
           score: 0
         }
       ]
     };
-    const newGame = new Games({
-      ...gameSettings,
-      host: {
-        name: 'snader',
-        socketId: socket.id
-      }
-    });
-    await newGame.save();
+    currentGames.push({ ...gameSettings, hostSocket: socket.id });
     socket.join(`${roomId}`);
-    socket.emit('gameCreated', { ...gameSettings, host: host.name });
-    // sendAvailableGames(socket); unsure if this is really needed because you dont care which servers are available when youre in a lobby
+    socket.emit('gameCreated', {
+      ...gameSettings,
+      isHost: true
+    });
+    sendAvailableGames();
+  });
+
+  socket.on('startGame', roomId => {
+    const isHost = currentGames.find(game => {
+      if (game.roomId === roomId && game.hostSocket === String(socket.id)) {
+        return true;
+      }
+      return false;
+    });
+
+    if (isHost) {
+      return socket.emit('initGame', 'game started');
+    }
+    return sendMessage('You are not the host of this game', true, socket);
+  });
+
+  socket.on('joinGame', ({ roomId, name }) => {
+    return currentGames.find((game, idx) => {
+      if (game.roomId) {
+        if (game.playerCount === game.maxPlayers) {
+          return sendMessage('The game is full', true, socket);
+        } else if (game.passwordProtected) {
+          return sendMessage('Please provide a password', true, socket);
+        }
+        socket.join(String(roomId));
+        io.to(String(roomId)).emit('playerJoin', {
+          name: 'Rob',
+          cards: 0,
+          score: 0
+        });
+
+        currentGames[idx].playerCount += 1;
+
+        socket.emit('joinedGame', {
+          playerCount: game.playerCount,
+          maxPlayers: game.maxPlayers,
+          name: game.name,
+          roomId: game.roomId,
+          inLobby: game.inLobby,
+          host: game.host,
+          players: [...game.players, { name, cards: 0, score: 0 }],
+          isHost: false
+        });
+
+        return sendAvailableGames();
+      }
+      return sendMessage('This game does not exist', true, socket);
+    });
   });
 });

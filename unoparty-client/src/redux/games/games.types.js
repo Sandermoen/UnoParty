@@ -1,0 +1,7 @@
+const gamesTypes = {
+  UPDATE_AVAILABLE_GAMES: 'UPDATE_AVAILABLE_GAMES',
+  UPDATE_CURRENT_GAME: 'UPDATE_CURRENT_GAME',
+  ADD_PLAYER: 'ADD_PLAYER'
+};
+
+export default gamesTypes;
