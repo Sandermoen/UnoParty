@@ -23,6 +23,14 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
         ...state,
         currentGame: { ...state.currentGame, players: addedPlayer }
       };
+    case gamesTypes.UPDATE_CURRENT_GAME_LOBBY_STATE:
+      return {
+        ...state,
+        currentGame: {
+          ...state.currentGame,
+          inLobby: !state.currentGame.inLobby
+        }
+      };
     default:
       return { ...state };
   }

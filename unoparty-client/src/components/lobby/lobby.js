@@ -2,8 +2,12 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import socket from '../../socket.io/socketConnection';
+import { withRouter } from 'react-router-dom';
 
-import { addPlayer } from '../../redux/games/games.actions';
+import {
+  addPlayer,
+  updateCurrentGameLobbyState
+} from '../../redux/games/games.actions';
 import { selectCurrentGame } from '../../redux/games/games.selectors';
 
 import Row from 'react-bootstrap/Row';
@@ -21,15 +25,20 @@ const startGame = roomId => {
 };
 
 const Lobby = ({
-  currentGame: { playerCount, maxPlayers, name, players, host, isHost, roomId },
-  addPlayer
+  currentGame: { maxPlayers, name, players, host, isHost, roomId, inLobby },
+  addPlayer,
+  updateCurrentGameLobbyState,
+  history
 }) => {
   useEffect(() => {
-    socket.on('initGame', data => {});
+    socket.on('initGame', data => {
+      updateCurrentGameLobbyState();
+      history.push('/game');
+    });
     socket.on('playerJoin', player => {
       addPlayer(player);
     });
-  }, []);
+  }, [addPlayer]);
   return (
     <Row className="lobby">
       <Col xl="6" sm="12">
@@ -46,9 +55,7 @@ const Lobby = ({
               <p>Host: {host}</p>
               <p>Max Players: {maxPlayers}</p>
               <p>Password Protected: false</p>
-              <Badge variant="secondary">
-                {playerCount === 1 ? 'Waiting for players' : 'Waiting for host'}
-              </Badge>
+              <Badge variant="secondary">Waiting for host</Badge>
               {isHost ? (
                 <Button onClick={() => startGame(roomId)} variant="success">
                   Start Game
@@ -67,7 +74,8 @@ const mapStateToProps = createStructuredSelector({
 });
 
 const mapDispatchToProps = dispatch => ({
-  addPlayer: player => dispatch(addPlayer(player))
+  addPlayer: player => dispatch(addPlayer(player)),
+  updateCurrentGameLobbyState: () => dispatch(updateCurrentGameLobbyState())
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Lobby);
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Lobby));

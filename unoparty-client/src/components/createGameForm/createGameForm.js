@@ -28,7 +28,6 @@ const CreateGameForm = ({ history, updateCurrentGame }) => {
     socket.emit('createGame', {
       name: gameName,
       maxPlayers: Number(maxPlayers),
-      host: 'snader',
       passwordProtected: false
     });
     socket.on('gameCreated', data => {

@@ -4,7 +4,7 @@ import socket from '../../socket.io/socketConnection';
 import Button from 'react-bootstrap/Button';
 
 const handleClick = roomId => {
-  socket.emit('joinGame', { roomId, name: 'Rob' });
+  socket.emit('joinGame', { roomId });
 };
 
 const Game = ({ name, playerCount, host, maxPlayers, roomId }) => {

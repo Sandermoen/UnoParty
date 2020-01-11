@@ -15,6 +15,7 @@ import './App.styles.css';
 import Logo from './components/logo/logo';
 import GameBrowserPage from './pages/gameBrowserPage/gameBrowserPage';
 import GameLobbyPage from './pages/gameLobbyPage/gameLobbyPage';
+import GamePage from './pages/gamePage/gamePage';
 
 const App = ({ updateAvailableGames, updateCurrentGame, history }) => {
   useEffect(() => {
@@ -36,6 +37,9 @@ const App = ({ updateAvailableGames, updateCurrentGame, history }) => {
         </Route>
         <Route path="/lobby">
           <GameLobbyPage />
+        </Route>
+        <Route path="/game">
+          <GamePage />
         </Route>
       </Switch>
     </Container>

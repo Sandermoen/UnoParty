@@ -26,8 +26,8 @@ io.on('connect', socket => {
     sendAvailableGames();
   });
 
-  socket.on('createGame', ({ maxPlayers, name, host }) => {
-    if (!maxPlayers || !name || !host)
+  socket.on('createGame', ({ maxPlayers, name }) => {
+    if (!maxPlayers || !name)
       return sendMessage('Please provide all the info needed', true, socket);
     const roomId = `${Math.floor(Math.random() * 9999) + 1}`;
     const gameSettings = {
@@ -37,10 +37,10 @@ io.on('connect', socket => {
       name,
       roomId,
       inLobby: true,
-      host,
+      host: socket.handshake.query.username,
       players: [
         {
-          name: host,
+          name: socket.handshake.query.username,
           cards: 0,
           score: 0
         }
@@ -69,7 +69,7 @@ io.on('connect', socket => {
     return sendMessage('You are not the host of this game', true, socket);
   });
 
-  socket.on('joinGame', ({ roomId, name }) => {
+  socket.on('joinGame', ({ roomId }) => {
     return currentGames.find((game, idx) => {
       if (game.roomId) {
         if (game.playerCount === game.maxPlayers) {
@@ -79,21 +79,28 @@ io.on('connect', socket => {
         }
         socket.join(String(roomId));
         io.to(String(roomId)).emit('playerJoin', {
-          name: 'Rob',
+          name: socket.handshake.query.username,
           cards: 0,
           score: 0
         });
 
-        currentGames[idx].playerCount += 1;
+        const updatedGame = (currentGames[idx] = {
+          ...currentGames[idx],
+          playerCount: currentGames[idx].playerCount + 1,
+          players: [
+            ...currentGames[idx].players,
+            {
+              name: socket.handshake.query.username,
+              cards: 0,
+              score: 0
+            }
+          ]
+        });
+
+        const { hostSocket, ...gameInfo } = updatedGame;
 
         socket.emit('joinedGame', {
-          playerCount: game.playerCount,
-          maxPlayers: game.maxPlayers,
-          name: game.name,
-          roomId: game.roomId,
-          inLobby: game.inLobby,
-          host: game.host,
-          players: [...game.players, { name, cards: 0, score: 0 }],
+          ...gameInfo,
           isHost: false
         });
 
