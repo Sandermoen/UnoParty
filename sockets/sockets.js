@@ -8,20 +8,36 @@ const sendMessage = (message, error, socket) => {
 
 const sendAvailableGames = () => {
   const availableGames = currentGames.map(
-    ({ playerCount, maxPlayers, name, passwordProtected, host, roomId }) => ({
-      roomId,
+    ({
       playerCount,
       maxPlayers,
       name,
       passwordProtected,
-      host
-    })
+      host,
+      roomId,
+      inLobby
+    }) => {
+      if (inLobby) {
+        return {
+          roomId,
+          playerCount,
+          maxPlayers,
+          name,
+          passwordProtected,
+          host,
+          inLobby
+        };
+      }
+      return;
+    }
   );
   io.emit('availableGames', availableGames);
 };
 
 io.on('connect', socket => {
   console.log('a client has connected', socket.id);
+  const username = socket.handshake.query.username;
+
   socket.on('requestAvailableGames', () => {
     sendAvailableGames();
   });
@@ -37,10 +53,10 @@ io.on('connect', socket => {
       name,
       roomId,
       inLobby: true,
-      host: socket.handshake.query.username,
+      host: username,
       players: [
         {
-          name: socket.handshake.query.username,
+          name: username,
           cards: 0,
           score: 0
         }
@@ -56,17 +72,22 @@ io.on('connect', socket => {
   });
 
   socket.on('startGame', roomId => {
-    const isHost = currentGames.find(game => {
-      if (game.roomId === roomId && game.hostSocket === String(socket.id)) {
+    const validGame = currentGames.find((game, idx) => {
+      if (
+        game.roomId === roomId &&
+        game.hostSocket === String(socket.id) &&
+        game.playerCount > 1
+      ) {
+        currentGames[idx].inLobby = false;
         return true;
       }
       return false;
     });
 
-    if (isHost) {
-      return socket.emit('initGame', 'game started');
+    if (validGame) {
+      return io.to(String(roomId)).emit('initGame', 'game started');
     }
-    return sendMessage('You are not the host of this game', true, socket);
+    return sendMessage('Could not start the game', true, socket);
   });
 
   socket.on('joinGame', ({ roomId }) => {
@@ -79,7 +100,7 @@ io.on('connect', socket => {
         }
         socket.join(String(roomId));
         io.to(String(roomId)).emit('playerJoin', {
-          name: socket.handshake.query.username,
+          name: username,
           cards: 0,
           score: 0
         });
@@ -90,7 +111,7 @@ io.on('connect', socket => {
           players: [
             ...currentGames[idx].players,
             {
-              name: socket.handshake.query.username,
+              name: username,
               cards: 0,
               score: 0
             }

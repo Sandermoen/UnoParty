@@ -1,0 +1,12 @@
+.uno-card-plus-four-mini-card {
+  background: #08ba22;
+  width: 25px;
+  position: absolute;
+  z-index: 12;
+  height: 50px;
+  transform: skew(-22deg, 7deg);
+  border-radius: 4px;
+  border: 2px solid white;
+  box-shadow: 2px 3px 0px rgb(0, 0, 0);
+  margin: -6px 0px 0px 14px;
+}

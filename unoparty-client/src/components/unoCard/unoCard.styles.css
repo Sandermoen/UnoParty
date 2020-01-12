@@ -1,0 +1,53 @@
+.uno-card {
+  height: 200px;
+  width: 150px;
+  border-radius: 15px;
+  border: 6px solid white;
+  margin-left: -50px;
+  position: relative;
+  cursor: pointer;
+  box-shadow: -5px 2px 4px rgba(0, 0, 0, 0.5);
+  z-index: 11;
+}
+
+.uno-card-small-number {
+  color: white;
+  text-shadow: black 1px 3px 1px;
+  font-weight: bold;
+  font-size: 2em;
+  position: absolute;
+  left: 5px;
+  top: -5px;
+}
+
+.flipped {
+  transform: rotate(180deg);
+  right: 5px;
+  bottom: -5px;
+}
+
+.uno-card-middle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.uno-card-middle-circle {
+  background-color: white;
+  width: 100%;
+  height: 70%;
+  border-radius: 100%;
+  transform: skew(-15deg, -15deg);
+}
+
+.uno-card-middle-circle-number {
+  transform: skew(0deg, 0deg);
+  font-size: 4.5em;
+  font-weight: bold;
+  position: absolute;
+  z-index: 10;
+  margin-bottom: 0;
+  color: red;
+  text-shadow: black 1px 3px 1px;
+}

@@ -2,8 +2,14 @@ import React from 'react';
 
 import './gamePage.styles.css';
 
+import CurrentUserHand from '../../components/currentUserHand/currentUserHand';
+
 const GamePage = () => {
-  return 'Heres where it will go down';
+  return (
+    <div className="game-container">
+      <CurrentUserHand />
+    </div>
+  );
 };
 
 export default GamePage;
