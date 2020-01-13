@@ -1,0 +1,14 @@
+.opponent-hand-col {
+  display: flex;
+  justify-content: center;
+}
+
+.opponent-hand {
+  width: auto;
+  height: 33.3vh;
+}
+
+.opponent-hand-cards {
+  width: 100%;
+  display: flex;
+}

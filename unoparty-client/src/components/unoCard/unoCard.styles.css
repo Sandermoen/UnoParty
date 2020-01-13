@@ -3,11 +3,11 @@
   width: 150px;
   border-radius: 15px;
   border: 6px solid white;
-  margin-left: -50px;
   position: relative;
   cursor: pointer;
   box-shadow: -5px 2px 4px rgba(0, 0, 0, 0.5);
   z-index: 11;
+  overflow: hidden;
 }
 
 .uno-card-small-number {
@@ -48,6 +48,6 @@
   position: absolute;
   z-index: 10;
   margin-bottom: 0;
-  color: red;
+  color: #fe2727;
   text-shadow: black 1px 3px 1px;
 }

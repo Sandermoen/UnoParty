@@ -38,7 +38,7 @@ const Lobby = ({
     socket.on('playerJoin', player => {
       addPlayer(player);
     });
-  }, [addPlayer]);
+  }, [addPlayer, history, updateCurrentGameLobbyState]);
   return (
     <Row className="lobby">
       <Col xl="6" sm="12">

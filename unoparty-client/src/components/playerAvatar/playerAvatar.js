@@ -2,9 +2,9 @@ import React from 'react';
 
 import './playerAvatar.styles.css';
 
-const PlayerAvatar = ({ children }) => {
+const PlayerAvatar = ({ children, additionalStyles }) => {
   return (
-    <div className="player-avatar">
+    <div style={{ ...additionalStyles }} className="player-avatar">
       <span>{children}</span>
     </div>
   );

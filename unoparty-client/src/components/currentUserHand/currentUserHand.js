@@ -9,15 +9,15 @@ import UnoCard from '../unoCard/unoCard';
 
 const CurrentUserHand = () => {
   return (
-    <Row style={{ height: '26.6vh' }} className="fixed-bottom">
-      <Col className="current-user-hand" sm="12">
+    <Row style={{ height: '33.3vh' }} className="fixed-bottom">
+      <Col className="current-user-hand fixed-bottom" sm="12">
         <UnoCard number={1} />
-        <UnoCard number={2} />
-        <UnoCard number={3} />
-        <UnoCard number={4} />
-        <UnoCard number={5} />
-        <UnoCard number={6} />
-        <UnoCard number={7} />
+        <UnoCard additionalStyles={{ marginLeft: '-50px' }} number={2} />
+        <UnoCard additionalStyles={{ marginLeft: '-50px' }} number={3} />
+        <UnoCard additionalStyles={{ marginLeft: '-50px' }} number={4} />
+        <UnoCard additionalStyles={{ marginLeft: '-50px' }} number={5} />
+        <UnoCard additionalStyles={{ marginLeft: '-50px' }} number={6} />
+        <UnoCard additionalStyles={{ marginLeft: '-50px' }} number={7} />
       </Col>
     </Row>
   );

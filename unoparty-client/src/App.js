@@ -3,9 +3,11 @@ import { Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
 import socket from './socket.io/socketConnection';
 import { withRouter } from 'react-router-dom';
+import { createStructuredSelector } from 'reselect';
 
 import { updateAvailableGames } from './redux/games/games.actions';
 import { updateCurrentGame } from './redux/games/games.actions';
+import { selectCurrentGame } from './redux/games/games.selectors';
 
 import Container from 'react-bootstrap/Container';
 
@@ -17,7 +19,12 @@ import GameBrowserPage from './pages/gameBrowserPage/gameBrowserPage';
 import GameLobbyPage from './pages/gameLobbyPage/gameLobbyPage';
 import GamePage from './pages/gamePage/gamePage';
 
-const App = ({ updateAvailableGames, updateCurrentGame, history }) => {
+const App = ({
+  updateAvailableGames,
+  updateCurrentGame,
+  history,
+  currentGame: { inLobby }
+}) => {
   useEffect(() => {
     socket.on('availableGames', data => {
       updateAvailableGames(data);
@@ -26,11 +33,12 @@ const App = ({ updateAvailableGames, updateCurrentGame, history }) => {
       updateCurrentGame(game);
       history.push('/lobby');
     });
-  }, [updateAvailableGames]);
-
+  }, [updateAvailableGames, updateCurrentGame, history]);
   return (
     <Container fluid className="app">
-      <Logo />
+      <Logo
+        watermark={history.location.pathname === '/' || inLobby ? false : true}
+      />
       <Switch>
         <Route exact path="/">
           <GameBrowserPage />
@@ -51,4 +59,8 @@ const mapDispatchToProps = dispatch => ({
   updateCurrentGame: game => dispatch(updateCurrentGame(game))
 });
 
-export default connect(null, mapDispatchToProps)(withRouter(App));
+const mapStateToProps = createStructuredSelector({
+  currentGame: selectCurrentGame
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App));

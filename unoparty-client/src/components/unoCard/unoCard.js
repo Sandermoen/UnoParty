@@ -1,19 +1,16 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import './unoCard.styles.css';
 
-import PlusFourCardMiniCards from '../plusFourCardMiniCards/plusFourCardMiniCards';
-
-const UnoCard = ({ number, plusFourCard = true, color = '#202020' }) => {
+const UnoCard = ({ number, color = '#fe2727', additionalStyles }) => {
   return (
-    <div style={{ background: color }} className="uno-card">
+    <div
+      style={{ background: color, ...additionalStyles }}
+      className="uno-card"
+    >
       <span className="uno-card-small-number">{number}</span>
       <div className="uno-card-middle">
-        {plusFourCard ? (
-          <PlusFourCardMiniCards />
-        ) : (
-          <span className="uno-card-middle-circle-number">{number}</span>
-        )}
+        <span className="uno-card-middle-circle-number">{number}</span>
         <div className="uno-card-middle-circle"></div>
       </div>
       <span className="uno-card-small-number flipped">{number}</span>
