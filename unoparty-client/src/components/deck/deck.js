@@ -16,8 +16,8 @@ const Deck = () => {
           alignItems: 'center'
         }}
       >
-        <UnoCard number="5" />
-        <UnoCardBackside />
+        <UnoCard additionalStyles={{ marginRight: '5px' }} number="5" />
+        <UnoCardBackside additionalStyles={{ marginLeft: '5px' }} />
       </Col>
     </Row>
   );

@@ -57,7 +57,7 @@ io.on('connect', socket => {
       players: [
         {
           name: username,
-          cards: 0,
+          cards: [],
           score: 0
         }
       ]
@@ -72,22 +72,59 @@ io.on('connect', socket => {
   });
 
   socket.on('startGame', roomId => {
-    const validGame = currentGames.find((game, idx) => {
+    const colors = ['red', 'green', 'blue', 'yellow'];
+    currentGames.find((game, idx) => {
       if (
         game.roomId === roomId &&
         game.hostSocket === String(socket.id) &&
         game.playerCount > 1
       ) {
         currentGames[idx].inLobby = false;
-        return true;
-      }
-      return false;
-    });
+        currentGames[idx].players.forEach((player, playerIdx) => {
+          for (let i = 0; i < 7; i++) {
+            const randomType = Math.floor(Math.random() * 109) + 1;
+            const randomNumber = Math.floor(Math.random() * 10);
+            let randomColor = colors[Math.floor(Math.random() * 4)];
 
-    if (validGame) {
-      return io.to(String(roomId)).emit('initGame', 'game started');
-    }
-    return sendMessage('Could not start the game', true, socket);
+            switch (true) {
+              case randomType < 3:
+                currentGames[idx].players[playerIdx].cards.push('+4');
+                break;
+              case randomType < 5 && randomType > 2:
+                currentGames[idx].players[playerIdx].cards.push('wild');
+                break;
+              case randomType < 9 && randomType > 4:
+                currentGames[idx].players[playerIdx].cards.push('+2');
+                break;
+              case randomType < 13 && randomType > 8:
+                currentGames[idx].players[playerIdx].cards.push('reverse');
+                break;
+              case randomType < 17 && randomType > 12:
+                currentGames[idx].players[playerIdx].cards.push('skip');
+                break;
+              case randomType > 16:
+                currentGames[idx].players[playerIdx].cards.push(
+                  `normal color ${randomColor} number: ${randomNumber}`
+                );
+                break;
+            }
+          }
+        });
+        return io.to(String(roomId)).emit(
+          'initGame',
+          currentGames[idx].players.map(player => {
+            if (player.name !== socket.handshake.query.username) {
+              return {
+                ...player,
+                cards: player.cards.length
+              };
+            }
+            return player;
+          })
+        );
+      }
+      return sendMessage('Could not start the game', true, socket);
+    });
   });
 
   socket.on('joinGame', ({ roomId }) => {
@@ -99,11 +136,13 @@ io.on('connect', socket => {
           return sendMessage('Please provide a password', true, socket);
         }
         socket.join(String(roomId));
-        io.to(String(roomId)).emit('playerJoin', {
+        const player = {
           name: username,
-          cards: 0,
+          cards: [],
           score: 0
-        });
+        };
+
+        io.to(String(roomId)).emit('playerJoin', player);
 
         const updatedGame = (currentGames[idx] = {
           ...currentGames[idx],
@@ -111,9 +150,7 @@ io.on('connect', socket => {
           players: [
             ...currentGames[idx].players,
             {
-              name: username,
-              cards: 0,
-              score: 0
+              ...player
             }
           ]
         });

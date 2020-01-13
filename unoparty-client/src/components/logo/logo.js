@@ -17,7 +17,8 @@ const Logo = ({ watermark }) => {
             height: '20vh',
             right: '0',
             bottom: '0',
-            zIndex: '9999'
+            zIndex: '9999',
+            opacity: '0.5'
           }}
         />
       ) : (

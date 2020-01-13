@@ -8,6 +8,7 @@ import { createStructuredSelector } from 'reselect';
 import { updateAvailableGames } from './redux/games/games.actions';
 import { updateCurrentGame } from './redux/games/games.actions';
 import { selectCurrentGame } from './redux/games/games.selectors';
+import { setPlayerName } from './redux/player/player.actions';
 
 import Container from 'react-bootstrap/Container';
 
@@ -56,7 +57,8 @@ const App = ({
 
 const mapDispatchToProps = dispatch => ({
   updateAvailableGames: games => dispatch(updateAvailableGames(games)),
-  updateCurrentGame: game => dispatch(updateCurrentGame(game))
+  updateCurrentGame: game => dispatch(updateCurrentGame(game)),
+  setPlayerName: name => dispatch(setPlayerName(name))
 });
 
 const mapStateToProps = createStructuredSelector({

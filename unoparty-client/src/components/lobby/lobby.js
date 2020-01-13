@@ -33,6 +33,7 @@ const Lobby = ({
   useEffect(() => {
     socket.on('initGame', data => {
       updateCurrentGameLobbyState();
+      console.log(data);
       history.push('/game');
     });
     socket.on('playerJoin', player => {
