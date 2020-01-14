@@ -18,3 +18,15 @@ export const addPlayer = player => ({
 export const updateCurrentGameLobbyState = () => ({
   type: gamesTypes.UPDATE_CURRENT_GAME_LOBBY_STATE
 });
+
+export const updateCurrentGamePlayers = players => ({
+  type: gamesTypes.UPDATE_CURRENT_GAME_PLAYERS,
+  payload: players
+});
+
+export const initGame = players => {
+  return dispatch => {
+    dispatch(updateCurrentGameLobbyState());
+    dispatch(updateCurrentGamePlayers(players));
+  };
+};

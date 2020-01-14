@@ -31,6 +31,13 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
           inLobby: !state.currentGame.inLobby
         }
       };
+    case gamesTypes.UPDATE_CURRENT_GAME_PLAYERS:
+      return {
+        ...state,
+        currentGame: {
+          players: action.payload
+        }
+      };
     default:
       return { ...state };
   }

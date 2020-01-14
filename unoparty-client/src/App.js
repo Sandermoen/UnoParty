@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
 import socket from './socket.io/socketConnection';
@@ -11,6 +11,7 @@ import { selectCurrentGame } from './redux/games/games.selectors';
 import { setPlayerName } from './redux/player/player.actions';
 
 import Container from 'react-bootstrap/Container';
+import Alert from 'react-bootstrap/Alert';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.styles.css';
@@ -26,6 +27,7 @@ const App = ({
   history,
   currentGame: { inLobby }
 }) => {
+  const [alert, setAlert] = useState({});
   useEffect(() => {
     socket.on('availableGames', data => {
       updateAvailableGames(data);
@@ -34,9 +36,15 @@ const App = ({
       updateCurrentGame(game);
       history.push('/lobby');
     });
+    socket.on('message', message => {
+      setAlert(message);
+    });
   }, [updateAvailableGames, updateCurrentGame, history]);
   return (
     <Container fluid className="app">
+      {alert.message && (
+        <Alert variant={alert.error ? 'danger' : 'dark'}>{alert.message}</Alert>
+      )}
       <Logo
         watermark={history.location.pathname === '/' || inLobby ? false : true}
       />

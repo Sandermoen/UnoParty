@@ -11,3 +11,8 @@ export const selectCurrentGame = createSelector(
   [selectGames],
   games => games.currentGame
 );
+
+export const selectCurrentGamePlayers = createSelector(
+  [selectGames],
+  games => games.currentGame.players
+);

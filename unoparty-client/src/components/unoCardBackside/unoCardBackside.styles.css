@@ -15,7 +15,8 @@
   color: #f7c112;
   -webkit-text-stroke-width: 1px;
   -webkit-text-stroke-color: white;
-  text-shadow: black -4px 4px 1px;
+  text-shadow: black -2px 1px 0px, black -3px 2px 0px, black -4px 3px 0px,
+    black -5px 4px 0px, black -6px 5px 0px;
   font-weight: bold;
   font-size: 3.4em;
   position: absolute;
