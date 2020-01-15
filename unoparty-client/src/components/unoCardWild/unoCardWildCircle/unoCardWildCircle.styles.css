@@ -1,0 +1,20 @@
+.uno-card-wild-middle-circle {
+  overflow: hidden;
+  background-color: white;
+  width: 100%;
+  height: 70%;
+  border-radius: 100%;
+  transform: skew(-15deg, -15deg);
+  border: 4px solid white;
+}
+
+.uno-card-wild-color-row {
+  height: 50%;
+  width: 100%;
+  margin: 0;
+}
+
+.uno-card-wild-color {
+  height: 100%;
+  width: 50%;
+}

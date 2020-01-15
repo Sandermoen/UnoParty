@@ -11,6 +11,7 @@ import Game from '../game/game';
 
 const Games = ({ availableGames }) => {
   useEffect(() => {
+    console.log(availableGames);
     socket.emit('requestAvailableGames');
   }, []);
   return (

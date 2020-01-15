@@ -85,6 +85,7 @@ io.on('connect', socket => {
     ) {
       const gameToStart = currentGames.roomId;
       gameToStart.inLobby = false;
+      sendAvailableGames();
 
       const colors = ['red', 'green', 'blue', 'yellow'];
       gameToStart.players.forEach((player, idx) => {
@@ -95,24 +96,41 @@ io.on('connect', socket => {
 
           switch (true) {
             case randomType < 3:
-              gameToStart.players[idx].cards.push('+4');
+              gameToStart.players[idx].cards.push({
+                type: '+4',
+                color: 'black'
+              });
               break;
             case randomType < 5 && randomType > 2:
-              gameToStart.players[idx].cards.push('wild');
+              gameToStart.players[idx].cards.push({
+                type: 'wild',
+                color: 'black'
+              });
               break;
             case randomType < 9 && randomType > 4:
-              gameToStart.players[idx].cards.push('+2');
+              gameToStart.players[idx].cards.push({
+                type: '+2',
+                color: randomColor
+              });
               break;
             case randomType < 13 && randomType > 8:
-              gameToStart.players[idx].cards.push('reverse');
+              gameToStart.players[idx].cards.push({
+                type: 'reverse',
+                color: randomColor
+              });
               break;
             case randomType < 17 && randomType > 12:
-              gameToStart.players[idx].cards.push('skip');
+              gameToStart.players[idx].cards.push({
+                type: 'skip',
+                color: randomColor
+              });
               break;
             case randomType > 16:
-              gameToStart.players[idx].cards.push(
-                `normal color ${randomColor} number: ${randomNumber}`
-              );
+              gameToStart.players[idx].cards.push({
+                type: 'normal',
+                number: randomNumber,
+                color: randomColor
+              });
               break;
           }
         }

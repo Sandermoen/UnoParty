@@ -2,6 +2,14 @@
   background: #2a2a2a;
 }
 
+.backside {
+  margin-left: -120px;
+}
+
+.backside:first-child {
+  margin-left: 0px;
+}
+
 .uno-card-backside-middle-circle {
   background: #fe2727;
   width: 100%;

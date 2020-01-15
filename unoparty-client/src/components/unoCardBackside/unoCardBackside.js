@@ -5,7 +5,7 @@ import './unoCardBackside.styles.css';
 
 const UnoCardBackside = ({ additionalStyles }) => {
   return (
-    <div style={{ ...additionalStyles }} className="uno-card">
+    <div style={{ ...additionalStyles }} className="uno-card backside">
       <div className="uno-card-middle">
         <div className="uno-card-backside-middle-circle">
           <h1 className="uno-card-logo">UNO</h1>

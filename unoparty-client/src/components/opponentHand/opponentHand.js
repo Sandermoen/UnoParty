@@ -18,6 +18,10 @@ const OpponentHand = ({ currentGame: { players }, playerName }) => {
     <Row className="opponent-hand-container">
       {players.map(player => {
         if (player.name !== playerName) {
+          let cards = [];
+          for (let i = 0; i < player.cards; i++) {
+            cards.push(<UnoCardBackside />);
+          }
           return (
             <Col className="opponent-hand-col">
               <div className="opponent-hand">
@@ -26,32 +30,12 @@ const OpponentHand = ({ currentGame: { players }, playerName }) => {
                 >
                   {player.name}
                 </PlayerAvatar>
-                <div className="opponent-hand-cards">
-                  <UnoCardBackside />
-                  <UnoCardBackside
-                    additionalStyles={{ marginLeft: '-120px' }}
-                  />
-                  <UnoCardBackside
-                    additionalStyles={{ marginLeft: '-120px' }}
-                  />
-                  <UnoCardBackside
-                    additionalStyles={{ marginLeft: '-120px' }}
-                  />
-                  <UnoCardBackside
-                    additionalStyles={{ marginLeft: '-120px' }}
-                  />
-                  <UnoCardBackside
-                    additionalStyles={{ marginLeft: '-120px' }}
-                  />
-                  <UnoCardBackside
-                    additionalStyles={{ marginLeft: '-120px' }}
-                  />
-                </div>
+                <div className="opponent-hand-cards">{cards}</div>
               </div>
             </Col>
           );
         }
-        return;
+        return null;
       })}
     </Row>
   );
