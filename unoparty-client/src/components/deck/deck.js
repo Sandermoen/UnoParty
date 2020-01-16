@@ -16,7 +16,11 @@ const Deck = () => {
           alignItems: 'center'
         }}
       >
-        <UnoCard additionalStyles={{ marginRight: '5px' }} number="5" />
+        <UnoCard
+          additionalStyles={{ marginRight: '5px' }}
+          number="5"
+          cardType="normal"
+        />
         <UnoCardBackside additionalStyles={{ marginLeft: '5px' }} />
       </Col>
     </Row>

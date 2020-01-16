@@ -20,7 +20,7 @@ const OpponentHand = ({ currentGame: { players }, playerName }) => {
         if (player.name !== playerName) {
           let cards = [];
           for (let i = 0; i < player.cards; i++) {
-            cards.push(<UnoCardBackside />);
+            cards.push(<UnoCardBackside key={i} />);
           }
           return (
             <Col className="opponent-hand-col">
