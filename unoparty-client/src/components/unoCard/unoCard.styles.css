@@ -9,10 +9,15 @@
   z-index: 11;
   overflow: hidden;
   margin-left: -50px;
+  transition: transform 1s ease;
 }
 
 .uno-card:first-child {
   margin-left: 0px;
+}
+
+.uno-card:hover {
+  transform: rotate(-10deg);
 }
 
 .uno-card-small-number {

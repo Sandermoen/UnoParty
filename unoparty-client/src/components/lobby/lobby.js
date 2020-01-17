@@ -5,6 +5,8 @@ import socket from '../../socket.io/socketConnection';
 import { withRouter } from 'react-router-dom';
 
 import { addPlayer, initGame } from '../../redux/games/games.actions';
+import { updateCurrentGameCurrentCard } from '../../redux/games/games.actions';
+
 import { selectCurrentGame } from '../../redux/games/games.selectors';
 
 import Row from 'react-bootstrap/Row';
@@ -25,17 +27,21 @@ const Lobby = ({
   currentGame: { maxPlayers, name, players, host, isHost, roomId, inLobby },
   addPlayer,
   initGame,
-  history
+  history,
+  updateCurrentGameCurrentCard
 }) => {
   useEffect(() => {
     socket.on('initGame', data => {
+      socket.on('currentCard', card => {
+        updateCurrentGameCurrentCard(card);
+      });
       initGame(data);
       history.push('/game');
     });
     socket.on('playerJoin', player => {
       addPlayer(player);
     });
-  }, [addPlayer, history, initGame]);
+  }, [addPlayer, history, initGame, updateCurrentGameCurrentCard]);
   return (
     <Row className="lobby">
       <Col xl="6" sm="12">
@@ -72,7 +78,9 @@ const mapStateToProps = createStructuredSelector({
 
 const mapDispatchToProps = dispatch => ({
   addPlayer: player => dispatch(addPlayer(player)),
-  initGame: players => dispatch(initGame(players))
+  initGame: players => dispatch(initGame(players)),
+  updateCurrentGameCurrentCard: card =>
+    dispatch(updateCurrentGameCurrentCard(card))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Lobby));

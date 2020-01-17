@@ -1,4 +1,8 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
+
+import { selectCurrentGame } from '../../redux/games/games.selectors';
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -6,7 +10,7 @@ import Col from 'react-bootstrap/Col';
 import UnoCard from '../unoCard/unoCard';
 import UnoCardBackside from '../unoCardBackside/unoCardBackside';
 
-const Deck = () => {
+const Deck = ({ currentGame: { currentCard } }) => {
   return (
     <Row style={{ height: '33.3vh' }}>
       <Col
@@ -16,15 +20,22 @@ const Deck = () => {
           alignItems: 'center'
         }}
       >
-        <UnoCard
-          additionalStyles={{ marginRight: '5px' }}
-          number="5"
-          cardType="normal"
-        />
+        {currentCard && (
+          <UnoCard
+            additionalStyles={{ marginRight: '5px' }}
+            number={currentCard.number}
+            cardType={currentCard.type}
+            color={currentCard.color}
+          />
+        )}
         <UnoCardBackside additionalStyles={{ marginLeft: '5px' }} />
       </Col>
     </Row>
   );
 };
 
-export default Deck;
+const mapStateToProps = createStructuredSelector({
+  currentGame: selectCurrentGame
+});
+
+export default connect(mapStateToProps)(Deck);

@@ -1,7 +1,7 @@
 const { io } = require('../servers');
 const gameLogic = require('./gameLogic');
 
-let currentGames = [];
+let currentGames = {};
 
 const sendMessage = (message, error, socket) => {
   socket.emit('message', {
@@ -11,7 +11,7 @@ const sendMessage = (message, error, socket) => {
 };
 
 const sendAvailableGames = () => {
-  const availableGames = Object.values(currentGames).map(
+  const availableGames = Object.values(currentGames).filter(
     ({
       playerCount,
       maxPlayers,
@@ -32,10 +32,9 @@ const sendAvailableGames = () => {
           inLobby
         };
       }
-      return;
     }
   );
-  io.emit('availableGames', availableGames);
+  io.emit('availableGames', availableGames ? availableGames : []);
 };
 
 io.on('connect', socket => {
@@ -64,9 +63,10 @@ io.on('connect', socket => {
           cards: [],
           score: 0
         }
-      ]
+      ],
+      currentPlayerTurnIndex: 0
     };
-    currentGames.roomId = {
+    currentGames[roomId] = {
       ...gameSettings,
       hostSocket: socket.id
     };
@@ -78,5 +78,5 @@ io.on('connect', socket => {
     sendAvailableGames();
   });
 
-  gameLogic(currentGames, socket, sendAvailableGames, username);
+  gameLogic(currentGames, socket, sendAvailableGames, username, sendMessage);
 });

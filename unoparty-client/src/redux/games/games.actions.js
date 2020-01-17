@@ -24,6 +24,11 @@ export const updateCurrentGamePlayers = players => ({
   payload: players
 });
 
+export const updateCurrentGameCurrentCard = card => ({
+  type: gamesTypes.UPDATE_CURRENT_GAME_CURRENT_CARD,
+  payload: card
+});
+
 export const initGame = players => {
   return dispatch => {
     dispatch(updateCurrentGameLobbyState());

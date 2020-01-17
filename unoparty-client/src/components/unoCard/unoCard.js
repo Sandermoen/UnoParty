@@ -23,19 +23,6 @@ const UnoCard = ({ number, color, additionalStyles, cardType, playCard }) => {
             <span className="uno-card-small-number flipped">⊘</span>
           </Fragment>
         );
-      case 'normal':
-        return (
-          <Fragment>
-            <span className="uno-card-small-number">{number}</span>
-            <div className="uno-card-middle">
-              <span style={{ color }} className="uno-card-middle-circle-number">
-                {number}
-              </span>
-              <div className="uno-card-middle-circle"></div>
-            </div>
-            <span className="uno-card-small-number flipped">{number}</span>
-          </Fragment>
-        );
       case 'reverse':
         return (
           <Fragment>
@@ -57,7 +44,6 @@ const UnoCard = ({ number, color, additionalStyles, cardType, playCard }) => {
           </Fragment>
         );
       case '+2':
-        console.log(number);
         const plusTwoCardStyles = {
           height: '65px',
           width: '35px'
@@ -84,7 +70,6 @@ const UnoCard = ({ number, color, additionalStyles, cardType, playCard }) => {
           </Fragment>
         );
       case '+4':
-        console.log(number);
         return (
           <Fragment>
             <span className="uno-card-small-number">{number}</span>
@@ -141,6 +126,19 @@ const UnoCard = ({ number, color, additionalStyles, cardType, playCard }) => {
                 transform: 'rotate(180deg) skew(-15deg, -15deg)'
               }}
             />
+          </Fragment>
+        );
+      default:
+        return (
+          <Fragment>
+            <span className="uno-card-small-number">{number}</span>
+            <div className="uno-card-middle">
+              <span style={{ color }} className="uno-card-middle-circle-number">
+                {number}
+              </span>
+              <div className="uno-card-middle-circle"></div>
+            </div>
+            <span className="uno-card-small-number flipped">{number}</span>
           </Fragment>
         );
     }

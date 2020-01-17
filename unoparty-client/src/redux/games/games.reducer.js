@@ -38,6 +38,14 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
           players: action.payload
         }
       };
+    case gamesTypes.UPDATE_CURRENT_GAME_CURRENT_CARD:
+      return {
+        ...state,
+        currentGame: {
+          ...state.currentGame,
+          currentCard: action.payload
+        }
+      };
     default:
       return { ...state };
   }
