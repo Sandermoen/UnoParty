@@ -51,6 +51,18 @@ const generateRandomCard = () => {
   return randomCard;
 };
 
+const sanitizePlayer = (currentGame, username) => {
+  return currentGame.players.map(player => {
+    if (player.name === username) {
+      return player;
+    }
+    return {
+      ...player,
+      cards: player.cards.length
+    };
+  });
+};
+
 function gameLogic(
   currentGames,
   socket,
@@ -77,15 +89,10 @@ function gameLogic(
       return io.to(roomId).clients((err, clients) => {
         clients.forEach(client => {
           const clientSocket = io.sockets.sockets[client];
-          const players = gameToStart.players.map(player => {
-            if (player.name === clientSocket.handshake.query.username) {
-              return player;
-            }
-            return {
-              ...player,
-              cards: player.cards.length
-            };
-          });
+          const players = sanitizePlayer(
+            gameToStart,
+            clientSocket.handshake.query.username
+          );
           clientSocket.emit('initGame', players);
         });
 
@@ -132,37 +139,67 @@ function gameLogic(
 
   socket.on('playCard', cardIndex => {
     const roomId = Object.keys(socket.rooms)[0];
-    const currentRoom = currentGames[roomId];
-    let { currentCard, currentPlayerTurnIndex, players } = currentRoom;
-    const player = players.find(
-      (player, idx) =>
-        player.name === username && idx === currentPlayerTurnIndex
-    );
-    const cardToPlay = player.cards[cardIndex];
+    const currentGame = currentGames[roomId];
+    let { currentCard, currentPlayerTurnIndex, players } = currentGame;
+    let playerIdx;
+    const player = players.find((player, idx) => {
+      if (player.name === username && idx === currentPlayerTurnIndex) {
+        playerIdx = idx;
+        return player;
+      }
+    });
 
     if (!player) {
       return sendMessage('Error playing card', true, socket);
     }
 
+    const cardToPlay = player.cards[cardIndex];
+
     if (!cardToPlay) {
       return sendMessage('Card does not exist', true, socket);
     }
 
+    const playCard = card => {
+      currentPlayerTurnIndex + 1 > players.length - 1
+        ? (currentGame.currentPlayerTurnIndex = 0)
+        : (currentGame.currentPlayerTurnIndex += 1);
+      currentGame.currentCard = card;
+      console.log(`${username} played ${JSON.stringify(card)}`);
+      console.log('current turn index: ', currentGame.currentPlayerTurnIndex);
+      players.find(player => {
+        player.name === username && player.cards.splice(cardIndex, 1);
+      });
+
+      io.in(roomId).emit('cardPlayed', {
+        cardPlayerIndex: playerIdx,
+        cardIndex,
+        currentPlayerTurnIndex: currentGame.currentPlayerTurnIndex,
+        currentCard: card
+      });
+    };
+
     switch (cardToPlay.type) {
-      case 'normal':
+      case '+2':
+      case 'reverse':
+      case 'skip':
         if (
-          cardToPlay.number === currentCard.number ||
-          cardToPlay.color === currentCard.color
+          cardToPlay.color === currentCard.color ||
+          cardToPlay.type === currentCard.type
         ) {
-          currentPlayerTurnIndex + 1 > players.length
-            ? (currentRoom.currentPlayerTurnIndex = 0)
-            : (currentRoom.currentPlayerTurnIndex += 1);
-          currentRoom.currentCard = cardToPlay;
-          return players.find(player => {
-            player.name === username && player.cards.splice(cardIndex, 1);
-            console.log(JSON.stringify(player.cards));
-          });
+          playCard(cardToPlay);
         }
+        break;
+      case 'wild':
+      case '+4':
+        playCard(cardToPlay);
+      default:
+        if (
+          cardToPlay.color === currentCard.color ||
+          cardToPlay.number === currentCard.number
+        ) {
+          playCard(cardToPlay);
+        }
+        break;
     }
   });
 }

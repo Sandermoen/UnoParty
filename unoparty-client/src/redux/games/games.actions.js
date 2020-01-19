@@ -29,9 +29,25 @@ export const updateCurrentGameCurrentCard = card => ({
   payload: card
 });
 
-export const initGame = players => {
-  return dispatch => {
-    dispatch(updateCurrentGameLobbyState());
-    dispatch(updateCurrentGamePlayers(players));
-  };
+export const removePlayerCard = (playerIdx, cardIdx) => ({
+  type: gamesTypes.REMOVE_PLAYER_CARD,
+  payload: {
+    playerIdx,
+    cardIdx
+  }
+});
+
+export const initGame = players => dispatch => {
+  dispatch(updateCurrentGameLobbyState());
+  dispatch(updateCurrentGamePlayers(players));
+};
+
+export const playCard = (
+  cardPlayerIndex,
+  cardIndex,
+  currentPlayerTurnIndex,
+  currentCard
+) => dispatch => {
+  dispatch(removePlayerCard(cardPlayerIndex, cardIndex));
+  dispatch(updateCurrentGameCurrentCard(currentCard));
 };
