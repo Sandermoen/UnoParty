@@ -64,12 +64,6 @@ io.on('connect', socket => {
           score: 0
         }
       ],
-      // players: {
-      //   [username]: {
-      //     cards: [],
-      //     score: 0
-      //   }
-      // },
       currentPlayerTurnIndex: 0
     };
     currentGames[roomId] = {

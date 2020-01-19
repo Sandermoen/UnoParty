@@ -48,7 +48,6 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
       };
     case gamesTypes.REMOVE_PLAYER_CARD:
       const { playerIdx, cardIdx } = action.payload;
-      console.log(Array.isArray(state.currentGame.players[playerIdx].cards));
       if (Array.isArray(state.currentGame.players[playerIdx].cards)) {
         state.currentGame.players[playerIdx].cards.splice(cardIdx, 1);
         return { ...state };
