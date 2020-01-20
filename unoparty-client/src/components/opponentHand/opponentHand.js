@@ -16,14 +16,14 @@ import PlayerAvatar from '../playerAvatar/playerAvatar';
 const OpponentHand = ({ currentGame: { players }, playerName }) => {
   return (
     <Row className="opponent-hand-container">
-      {players.map(player => {
+      {players.map((player, idx) => {
         if (player.name !== playerName) {
           let cards = [];
           for (let i = 0; i < player.cards; i++) {
             cards.push(<UnoCardBackside key={i} />);
           }
           return (
-            <Col className="opponent-hand-col">
+            <Col key={idx} className="opponent-hand-col">
               <div className="opponent-hand">
                 <PlayerAvatar
                   additionalStyles={{ margin: '0 auto', marginBottom: '10px' }}

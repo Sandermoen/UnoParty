@@ -3,9 +3,13 @@ import React from 'react';
 import '../unoCard/unoCard.styles.css';
 import './unoCardBackside.styles.css';
 
-const UnoCardBackside = ({ additionalStyles }) => {
+const UnoCardBackside = ({ additionalStyles, drawCard }) => {
   return (
-    <div style={{ ...additionalStyles }} className="uno-card backside">
+    <div
+      onClick={drawCard}
+      style={{ ...additionalStyles }}
+      className="uno-card backside"
+    >
       <div className="uno-card-middle">
         <div className="uno-card-backside-middle-circle">
           <h1 className="uno-card-logo">UNO</h1>

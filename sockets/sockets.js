@@ -64,7 +64,8 @@ io.on('connect', socket => {
           score: 0
         }
       ],
-      currentPlayerTurnIndex: 0
+      currentPlayerTurnIndex: 0,
+      turnReverse: false
     };
     currentGames[roomId] = {
       ...gameSettings,

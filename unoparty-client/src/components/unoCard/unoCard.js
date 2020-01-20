@@ -7,14 +7,7 @@ import './unoCard.styles.css';
 import MiniCard from '../miniCard/miniCard';
 import UnoCardWildCircle from '../unoCardWildCircle/unoCardWildCircle';
 
-const UnoCard = ({
-  number,
-  color,
-  additionalStyles,
-  cardType,
-  playCard,
-  key
-}) => {
+const UnoCard = ({ number, color, additionalStyles, cardType, playCard }) => {
   const renderUnoCard = () => {
     switch (cardType) {
       case 'skip':

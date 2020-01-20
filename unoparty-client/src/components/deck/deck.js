@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import socket from '../../socket.io/socketConnection';
 
 import { selectCurrentGame } from '../../redux/games/games.selectors';
 
@@ -9,6 +10,10 @@ import Col from 'react-bootstrap/Col';
 
 import UnoCard from '../unoCard/unoCard';
 import UnoCardBackside from '../unoCardBackside/unoCardBackside';
+
+const drawCard = () => {
+  socket.emit('requestCard');
+};
 
 const Deck = ({ currentGame: { currentCard } }) => {
   return (
@@ -28,7 +33,10 @@ const Deck = ({ currentGame: { currentCard } }) => {
             color={currentCard.color}
           />
         )}
-        <UnoCardBackside additionalStyles={{ marginLeft: '5px' }} />
+        <UnoCardBackside
+          drawCard={() => drawCard()}
+          additionalStyles={{ marginLeft: '5px' }}
+        />
       </Col>
     </Row>
   );

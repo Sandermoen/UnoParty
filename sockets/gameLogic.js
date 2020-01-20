@@ -63,6 +63,18 @@ const sanitizePlayer = (currentGame, username) => {
   });
 };
 
+const isPlayerTurn = (currentGame, username) => {
+  const { players } = currentGame;
+  return players.find((player, idx) => {
+    if (
+      player.name === username &&
+      idx === currentGame.currentPlayerTurnIndex
+    ) {
+      return player;
+    }
+  });
+};
+
 function gameLogic(
   currentGames,
   socket,
@@ -82,7 +94,10 @@ function gameLogic(
 
       gameToStart.players.forEach((player, idx) => {
         for (let i = 0; i < 7; i++) {
-          gameToStart.players[idx].cards.push(generateRandomCard());
+          gameToStart.players[idx].cards.push({
+            ...generateRandomCard(),
+            key: i
+          });
         }
       });
 
@@ -140,14 +155,9 @@ function gameLogic(
   socket.on('playCard', cardIndex => {
     const roomId = Object.keys(socket.rooms)[0];
     const currentGame = currentGames[roomId];
-    let { currentCard, currentPlayerTurnIndex, players } = currentGame;
-    let playerIdx;
-    const player = players.find((player, idx) => {
-      if (player.name === username && idx === currentPlayerTurnIndex) {
-        playerIdx = idx;
-        return player;
-      }
-    });
+    let { currentCard, players } = currentGame;
+    const player = isPlayerTurn(currentGame, username);
+    const playerIdx = currentGame.currentPlayerTurnIndex;
 
     if (!player) {
       return sendMessage('Error playing card', true, socket);
@@ -159,10 +169,21 @@ function gameLogic(
       return sendMessage('Card does not exist', true, socket);
     }
 
+    const updateCurrentPlayerIndex = () => {
+      const { currentPlayerTurnIndex } = currentGame;
+      if (currentGame.turnReverse) {
+        currentPlayerTurnIndex - 1 < 0
+          ? (currentGame.currentPlayerTurnIndex = players.length - 1)
+          : (currentGame.currentPlayerTurnIndex -= 1);
+      } else {
+        currentPlayerTurnIndex + 1 > players.length - 1
+          ? (currentGame.currentPlayerTurnIndex = 0)
+          : (currentGame.currentPlayerTurnIndex += 1);
+      }
+    };
+
     const playCard = card => {
-      currentPlayerTurnIndex + 1 > players.length - 1
-        ? (currentGame.currentPlayerTurnIndex = 0)
-        : (currentGame.currentPlayerTurnIndex += 1);
+      updateCurrentPlayerIndex();
       currentGame.currentCard = card;
       console.log(`${username} played ${JSON.stringify(card)}`);
       console.log('current turn index: ', currentGame.currentPlayerTurnIndex);
@@ -186,6 +207,12 @@ function gameLogic(
           cardToPlay.color === currentCard.color ||
           cardToPlay.type === currentCard.type
         ) {
+          if (cardToPlay.type === 'reverse' && currentGame.players.length > 2) {
+            currentGame.turnReverse = !currentGame.turnReverse;
+          } else {
+            updateCurrentPlayerIndex();
+          }
+
           playCard(cardToPlay);
         }
         break;
@@ -201,6 +228,25 @@ function gameLogic(
         }
         break;
     }
+  });
+
+  socket.on('requestCard', () => {
+    const roomId = Object.keys(socket.rooms)[0];
+    const currentGame = currentGames[roomId];
+    const player = isPlayerTurn(currentGame, username);
+    const playerIdx = currentGame.currentPlayerTurnIndex;
+
+    if (!player) {
+      return sendMessage('Error drawing card', true, socket);
+    }
+
+    const randomCard = generateRandomCard();
+    currentGame.players[playerIdx].cards.push(randomCard);
+    socket.emit('drawnCard', {
+      playerIdx,
+      randomCards: [randomCard]
+    });
+    socket.to(String(roomId)).emit('drawnCard', { playerIdx });
   });
 }
 

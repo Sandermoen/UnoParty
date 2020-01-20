@@ -37,6 +37,14 @@ export const removePlayerCard = (playerIdx, cardIdx) => ({
   }
 });
 
+export const addPlayerCard = (playerIdx, cards) => ({
+  type: gamesTypes.ADD_PLAYER_CARD,
+  payload: {
+    playerIdx,
+    cards
+  }
+});
+
 export const initGame = players => dispatch => {
   dispatch(updateCurrentGameLobbyState());
   dispatch(updateCurrentGamePlayers(players));

@@ -7,23 +7,26 @@ const INITIAL_STATE = {
 
 const gamesReducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
-    case gamesTypes.UPDATE_AVAILABLE_GAMES:
+    case gamesTypes.UPDATE_AVAILABLE_GAMES: {
       return {
         ...state,
         availableGames: action.payload
       };
-    case gamesTypes.UPDATE_CURRENT_GAME:
+    }
+    case gamesTypes.UPDATE_CURRENT_GAME: {
       return {
         ...state,
         currentGame: action.payload
       };
-    case gamesTypes.ADD_PLAYER:
+    }
+    case gamesTypes.ADD_PLAYER: {
       const addedPlayer = [...state.currentGame.players, action.payload];
       return {
         ...state,
         currentGame: { ...state.currentGame, players: addedPlayer }
       };
-    case gamesTypes.UPDATE_CURRENT_GAME_LOBBY_STATE:
+    }
+    case gamesTypes.UPDATE_CURRENT_GAME_LOBBY_STATE: {
       return {
         ...state,
         currentGame: {
@@ -31,14 +34,16 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
           inLobby: !state.currentGame.inLobby
         }
       };
-    case gamesTypes.UPDATE_CURRENT_GAME_PLAYERS:
+    }
+    case gamesTypes.UPDATE_CURRENT_GAME_PLAYERS: {
       return {
         ...state,
         currentGame: {
           players: action.payload
         }
       };
-    case gamesTypes.UPDATE_CURRENT_GAME_CURRENT_CARD:
+    }
+    case gamesTypes.UPDATE_CURRENT_GAME_CURRENT_CARD: {
       return {
         ...state,
         currentGame: {
@@ -46,7 +51,8 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
           currentCard: action.payload
         }
       };
-    case gamesTypes.REMOVE_PLAYER_CARD:
+    }
+    case gamesTypes.REMOVE_PLAYER_CARD: {
       const { playerIdx, cardIdx } = action.payload;
       if (Array.isArray(state.currentGame.players[playerIdx].cards)) {
         state.currentGame.players[playerIdx].cards.splice(cardIdx, 1);
@@ -54,8 +60,24 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
       }
       state.currentGame.players[playerIdx].cards--;
       return { ...state };
-    default:
+    }
+    case gamesTypes.ADD_PLAYER_CARD: {
+      const { playerIdx, cards } = action.payload;
+      if (cards) {
+        const playerCards = state.currentGame.players[playerIdx].cards;
+        state.currentGame.players[playerIdx].cards = [...playerCards, ...cards];
+        return {
+          ...state
+        };
+      }
+      state.currentGame.players[playerIdx].cards++;
+      return {
+        ...state
+      };
+    }
+    default: {
       return { ...state };
+    }
   }
 };
 
