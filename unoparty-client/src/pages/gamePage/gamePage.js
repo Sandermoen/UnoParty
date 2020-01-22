@@ -22,8 +22,8 @@ const GamePage = ({ playCard, addPlayerCard }) => {
       } = data;
       playCard(cardPlayerIndex, cardIndex, currentPlayerTurnIndex, currentCard);
     });
-    socket.on('drawnCard', ({ playerIdx, randomCards }) => {
-      addPlayerCard(playerIdx, randomCards);
+    socket.on('drawnCard', ({ playerIdx, randomCards, numCards }) => {
+      addPlayerCard(playerIdx, randomCards, numCards);
     });
   }, [playCard, addPlayerCard]);
   return (
@@ -40,7 +40,8 @@ const mapDispatchToProps = dispatch => ({
     dispatch(
       playCard(cardPlayerIndex, cardIndex, currentPlayerTurnIndex, currentCard)
     ),
-  addPlayerCard: (playerIdx, cards) => dispatch(addPlayerCard(playerIdx, cards))
+  addPlayerCard: (playerIdx, cards, numCards) =>
+    dispatch(addPlayerCard(playerIdx, cards, numCards))
 });
 
 export default connect(null, mapDispatchToProps)(GamePage);

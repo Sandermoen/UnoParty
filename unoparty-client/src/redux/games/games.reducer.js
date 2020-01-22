@@ -1,4 +1,5 @@
 import gamesTypes from './games.types';
+import { deepCopyArray } from './games.utils';
 
 const INITIAL_STATE = {
   availableGames: [],
@@ -39,6 +40,7 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
       return {
         ...state,
         currentGame: {
+          ...state.currentGame,
           players: action.payload
         }
       };
@@ -54,29 +56,35 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
     }
     case gamesTypes.REMOVE_PLAYER_CARD: {
       const { playerIdx, cardIdx } = action.payload;
+      const players = deepCopyArray(state.currentGame.players);
       if (Array.isArray(state.currentGame.players[playerIdx].cards)) {
-        state.currentGame.players[playerIdx].cards.splice(cardIdx, 1);
-        return { ...state };
+        players[playerIdx].cards.splice(cardIdx, 1);
+      } else {
+        players[playerIdx].cards--;
       }
-      state.currentGame.players[playerIdx].cards--;
-      return { ...state };
+      return { ...state, currentGame: { ...state.currentGame, players } };
     }
     case gamesTypes.ADD_PLAYER_CARD: {
-      const { playerIdx, cards } = action.payload;
+      const { playerIdx, cards, numCards } = action.payload;
+      const players = deepCopyArray(state.currentGame.players);
       if (cards) {
         const playerCards = state.currentGame.players[playerIdx].cards;
-        state.currentGame.players[playerIdx].cards = [...playerCards, ...cards];
-        return {
-          ...state
-        };
+        const player = players[playerIdx];
+        player.cards = [...playerCards, ...cards];
+        players[playerIdx] = player;
+      } else {
+        players[playerIdx].cards += numCards;
       }
-      state.currentGame.players[playerIdx].cards++;
       return {
-        ...state
+        ...state,
+        currentGame: {
+          ...state.currentGame,
+          players
+        }
       };
     }
     default: {
-      return { ...state };
+      return state;
     }
   }
 };

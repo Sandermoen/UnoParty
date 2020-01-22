@@ -4,7 +4,7 @@ import { createStructuredSelector } from 'reselect';
 import socket from '../../socket.io/socketConnection';
 
 import { selectPlayerName } from '../../redux/player/player.selector';
-import { selectCurrentGame } from '../../redux/games/games.selectors';
+import { selectCurrentGamePlayers } from '../../redux/games/games.selectors';
 
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
@@ -13,8 +13,8 @@ import './currentUserHand.styles.css';
 
 import UnoCard from '../unoCard/unoCard';
 
-const CurrentUserHand = ({ playerName, currentGame: { players } }) => {
-  const player = players.find(player => player.name === playerName);
+const CurrentUserHand = ({ playerName, currentGamePlayers }) => {
+  const player = currentGamePlayers.find(player => player.name === playerName);
 
   const playCard = cardIndex => {
     if (!player.cards[cardIndex]) {
@@ -44,7 +44,7 @@ const CurrentUserHand = ({ playerName, currentGame: { players } }) => {
 
 const mapStateToProps = createStructuredSelector({
   playerName: selectPlayerName,
-  currentGame: selectCurrentGame
+  currentGamePlayers: selectCurrentGamePlayers
 });
 
 export default connect(mapStateToProps)(CurrentUserHand);

@@ -1,79 +1,11 @@
 const { io } = require('../servers');
-
-const colors = [
-  'rgb(254, 39, 39)',
-  'rgb(8, 186, 34)',
-  'rgb(9, 158, 255)',
-  'rgb(240, 206, 7)'
-];
-
-const generateRandomCard = () => {
-  const randomType = Math.floor(Math.random() * 109) + 1;
-  const randomNumber = Math.floor(Math.random() * 10);
-  let randomColor = colors[Math.floor(Math.random() * 4)];
-  let randomCard;
-
-  switch (true) {
-    case randomType < 3:
-      return (randomCard = {
-        type: '+4',
-        color: 'rgb(42, 42, 42)',
-        number: '+4'
-      });
-    case randomType < 5 && randomType > 2:
-      return (randomCard = {
-        type: 'wild',
-        color: 'rgb(42, 42, 42)'
-      });
-    case randomType < 9 && randomType > 4:
-      return (randomCard = {
-        type: '+2',
-        color: randomColor,
-        number: '+2'
-      });
-    case randomType < 13 && randomType > 8:
-      return (randomCard = {
-        type: 'reverse',
-        color: randomColor
-      });
-    case randomType < 17 && randomType > 12:
-      return (randomCard = {
-        type: 'skip',
-        color: randomColor
-      });
-    case randomType > 16:
-      return (randomCard = {
-        type: 'normal',
-        number: randomNumber,
-        color: randomColor
-      });
-  }
-  return randomCard;
-};
-
-const sanitizePlayer = (currentGame, username) => {
-  return currentGame.players.map(player => {
-    if (player.name === username) {
-      return player;
-    }
-    return {
-      ...player,
-      cards: player.cards.length
-    };
-  });
-};
-
-const isPlayerTurn = (currentGame, username) => {
-  const { players } = currentGame;
-  return players.find((player, idx) => {
-    if (
-      player.name === username &&
-      idx === currentGame.currentPlayerTurnIndex
-    ) {
-      return player;
-    }
-  });
-};
+const {
+  generateRandomCard,
+  sanitizePlayer,
+  isPlayerTurn,
+  updateCurrentPlayerTurnIndex,
+  canPlayCard
+} = require('./gameLogic.utils');
 
 function gameLogic(
   currentGames,
@@ -169,24 +101,12 @@ function gameLogic(
       return sendMessage('Card does not exist', true, socket);
     }
 
-    const updateCurrentPlayerIndex = () => {
-      const { currentPlayerTurnIndex } = currentGame;
-      if (currentGame.turnReverse) {
-        currentPlayerTurnIndex - 1 < 0
-          ? (currentGame.currentPlayerTurnIndex = players.length - 1)
-          : (currentGame.currentPlayerTurnIndex -= 1);
-      } else {
-        currentPlayerTurnIndex + 1 > players.length - 1
-          ? (currentGame.currentPlayerTurnIndex = 0)
-          : (currentGame.currentPlayerTurnIndex += 1);
-      }
-    };
-
     const playCard = card => {
-      updateCurrentPlayerIndex();
+      currentGame.currentPlayerTurnIndex = updateCurrentPlayerTurnIndex(
+        currentGame
+      );
       currentGame.currentCard = card;
       console.log(`${username} played ${JSON.stringify(card)}`);
-      console.log('current turn index: ', currentGame.currentPlayerTurnIndex);
       players.find(player => {
         player.name === username && player.cards.splice(cardIndex, 1);
       });
@@ -199,40 +119,60 @@ function gameLogic(
       });
     };
 
-    switch (cardToPlay.type) {
-      case '+2':
-      case 'reverse':
-      case 'skip':
-        if (
-          cardToPlay.color === currentCard.color ||
-          cardToPlay.type === currentCard.type
-        ) {
-          if (cardToPlay.type === 'reverse' && currentGame.players.length > 2) {
+    if (canPlayCard(cardToPlay, currentCard)) {
+      const cardType = cardToPlay.type;
+      switch (cardType) {
+        case 'reverse':
+        case 'skip': {
+          if (cardType === 'reverse' && currentGame.players.length > 2) {
             currentGame.turnReverse = !currentGame.turnReverse;
           } else {
-            updateCurrentPlayerIndex();
+            currentGame.currentPlayerTurnIndex = updateCurrentPlayerTurnIndex(
+              currentGame
+            );
           }
+          break;
+        }
+        case '+2': {
+          const playerToDrawIndex = updateCurrentPlayerTurnIndex(currentGame);
+          const playerToDrawUsername = players[playerToDrawIndex].name;
+          const randomCards = [];
 
-          playCard(cardToPlay);
+          for (let i = 0; i < 2; i++) {
+            randomCards.push(generateRandomCard());
+          }
+          players[playerToDrawIndex].cards = [
+            ...players[playerToDrawIndex].cards,
+            ...randomCards
+          ];
+          io.to(roomId).clients((err, clients) => {
+            clients.forEach(client => {
+              const clientSocket = io.sockets.sockets[client];
+              if (
+                clientSocket.handshake.query.username === playerToDrawUsername
+              ) {
+                return clientSocket.emit('drawnCard', {
+                  playerIdx: playerToDrawIndex,
+                  randomCards
+                });
+              }
+              return clientSocket.emit('drawnCard', {
+                playerIdx: playerToDrawIndex,
+                numCards: randomCards.length
+              });
+            });
+          });
+          break;
         }
-        break;
-      case 'wild':
-      case '+4':
-        playCard(cardToPlay);
-      default:
-        if (
-          cardToPlay.color === currentCard.color ||
-          cardToPlay.number === currentCard.number
-        ) {
-          playCard(cardToPlay);
-        }
-        break;
+      }
+      playCard(cardToPlay);
     }
   });
 
   socket.on('requestCard', () => {
     const roomId = Object.keys(socket.rooms)[0];
     const currentGame = currentGames[roomId];
+    const { currentCard } = currentGame;
     const player = isPlayerTurn(currentGame, username);
     const playerIdx = currentGame.currentPlayerTurnIndex;
 
@@ -241,12 +181,18 @@ function gameLogic(
     }
 
     const randomCard = generateRandomCard();
+    if (!canPlayCard(randomCard, currentCard)) {
+      currentGame.currentPlayerTurnIndex = updateCurrentPlayerTurnIndex(
+        currentGame
+      );
+    }
+
     currentGame.players[playerIdx].cards.push(randomCard);
     socket.emit('drawnCard', {
       playerIdx,
       randomCards: [randomCard]
     });
-    socket.to(String(roomId)).emit('drawnCard', { playerIdx });
+    socket.to(String(roomId)).emit('drawnCard', { playerIdx, numCards: 1 });
   });
 }
 

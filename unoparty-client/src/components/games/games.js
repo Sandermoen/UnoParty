@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import socket from '../../socket.io/socketConnection';
@@ -14,21 +14,39 @@ const Games = ({ availableGames }) => {
     socket.emit('requestAvailableGames');
   }, []);
   return (
-    <Table striped bordered hover variant="dark">
-      <thead>
-        <tr>
-          <th>Game Name</th>
-          <th>Players</th>
-          <th>Host</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {availableGames.map(({ roomId, ...props }) => (
-          <Game key={roomId} roomId={roomId} {...props} />
-        ))}
-      </tbody>
-    </Table>
+    <Fragment>
+      <Table striped bordered hover variant="dark">
+        <thead>
+          <tr>
+            <th>Game Name</th>
+            <th>Players</th>
+            <th>Host</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {availableGames.map(({ roomId, ...props }) => (
+            <Game key={roomId} roomId={roomId} {...props} />
+          ))}
+        </tbody>
+      </Table>
+      {!availableGames.length > 0 && (
+        <div style={{ color: 'white', textAlign: 'center' }}>
+          <h3>
+            Seems like there are no available games{' '}
+            <span role="img" aria-label="sadFace">
+              😕
+            </span>
+          </h3>
+          <h4>
+            Why not create one yourself?{' '}
+            <span role="img" aria-label="happyFace">
+              😀
+            </span>
+          </h4>
+        </div>
+      )}
+    </Fragment>
   );
 };
 

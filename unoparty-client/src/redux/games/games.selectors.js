@@ -11,3 +11,15 @@ export const selectCurrentGame = createSelector(
   [selectGames],
   games => games.currentGame
 );
+
+export const selectCurrentGamePlayers = createSelector(
+  [selectCurrentGame],
+  currentGame => {
+    const players = currentGame.players.map(({ name, cards, score }) => ({
+      name,
+      cards,
+      score
+    }));
+    return players;
+  }
+);
