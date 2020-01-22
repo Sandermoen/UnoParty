@@ -1,0 +1,19 @@
+.color-selector * {
+  padding: 10px 20px;
+  margin: 0px 3px;
+}
+
+@keyframes slideIn {
+  from {
+    margin-top: 100px;
+    opacity: 0;
+  }
+  to {
+    margin-top: 0px;
+    opacity: 1;
+  }
+}
+
+.color-selector {
+  animation: slideIn 200ms ease;
+}

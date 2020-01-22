@@ -1,11 +1,11 @@
-const generateRandomCard = () => {
-  const colors = [
-    'rgb(254, 39, 39)',
-    'rgb(8, 186, 34)',
-    'rgb(9, 158, 255)',
-    'rgb(240, 206, 7)'
-  ];
+const colors = [
+  'rgb(254, 39, 39)',
+  'rgb(8, 186, 34)',
+  'rgb(9, 158, 255)',
+  'rgb(240, 206, 7)'
+];
 
+const generateRandomCard = () => {
   const randomType = Math.floor(Math.random() * 109) + 1;
   const randomNumber = Math.floor(Math.random() * 10);
   let randomColor = colors[Math.floor(Math.random() * 4)];
@@ -39,7 +39,7 @@ const generateRandomCard = () => {
         type: 'skip',
         color: randomColor
       });
-    case randomType > 16:
+    default:
       return (randomCard = {
         type: 'normal',
         number: randomNumber,
@@ -87,6 +87,9 @@ const canPlayCard = (cardToPlay, currentCard) => {
       return false;
     case 'wild':
     case '+4':
+      if (!cardToPlay.color) {
+        return false;
+      }
       return true;
     case 'normal':
       if (
@@ -121,5 +124,6 @@ module.exports = {
   sanitizePlayer,
   isPlayerTurn,
   canPlayCard,
-  updateCurrentPlayerTurnIndex
+  updateCurrentPlayerTurnIndex,
+  colors
 };

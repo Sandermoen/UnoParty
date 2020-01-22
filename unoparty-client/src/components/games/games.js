@@ -15,7 +15,7 @@ const Games = ({ availableGames }) => {
   }, []);
   return (
     <Fragment>
-      <Table striped bordered hover variant="dark">
+      <Table striped bordered hover borderless variant="dark">
         <thead>
           <tr>
             <th>Game Name</th>
@@ -30,22 +30,6 @@ const Games = ({ availableGames }) => {
           ))}
         </tbody>
       </Table>
-      {!availableGames.length > 0 && (
-        <div style={{ color: 'white', textAlign: 'center' }}>
-          <h3>
-            Seems like there are no available games{' '}
-            <span role="img" aria-label="sadFace">
-              😕
-            </span>
-          </h3>
-          <h4>
-            Why not create one yourself?{' '}
-            <span role="img" aria-label="happyFace">
-              😀
-            </span>
-          </h4>
-        </div>
-      )}
     </Fragment>
   );
 };

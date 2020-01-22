@@ -45,7 +45,7 @@ const Lobby = ({
   return (
     <Row className="lobby">
       <Col xl="6" sm="12">
-        <Jumbotron className="bg-dark">
+        <Jumbotron className="bg-dark lobby-jumbotron">
           <h1 className="lobby-name">Game: {name}</h1>
           <Row className="lobby-details">
             <Col sm="6" className="lobby-players">

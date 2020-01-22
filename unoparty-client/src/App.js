@@ -29,6 +29,7 @@ const App = ({
 }) => {
   const [alert, setAlert] = useState({});
   useEffect(() => {
+    socket.emit('requestAvailableGames');
     socket.on('availableGames', data => {
       updateAvailableGames(data);
     });

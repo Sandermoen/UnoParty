@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import socket from '../../socket.io/socketConnection';
@@ -12,19 +12,42 @@ import Row from 'react-bootstrap/Row';
 import './currentUserHand.styles.css';
 
 import UnoCard from '../unoCard/unoCard';
+import ColorSelector from '../colorSelector/colorSelector';
 
 const CurrentUserHand = ({ playerName, currentGamePlayers }) => {
+  const INITIAL_COLOR_SELECTOR_DATA = {
+    show: false,
+    cardIndex: ''
+  };
+  const [colorSelectorData, setColorSelectorData] = useState(
+    INITIAL_COLOR_SELECTOR_DATA
+  );
   const player = currentGamePlayers.find(player => player.name === playerName);
 
   const playCard = cardIndex => {
-    if (!player.cards[cardIndex]) {
+    const playerCard = player.cards[cardIndex];
+    if (!playerCard) {
       return alert('card does not exist');
     }
-    socket.emit('playCard', cardIndex);
+    if (playerCard.type === '+4' || playerCard.type === 'wild') {
+      return setColorSelectorData({ show: true, cardIndex });
+    }
+    socket.emit('playCard', { cardIndex });
   };
 
   return (
-    <Row style={{ height: '33.3vh' }} className="fixed-bottom">
+    <Row
+      style={{ height: '33.3vh', justifyContent: 'center' }}
+      className="fixed-bottom"
+    >
+      {colorSelectorData.show && (
+        <ColorSelector
+          cardIndex={colorSelectorData.cardIndex}
+          hideColorSelector={() =>
+            setColorSelectorData(INITIAL_COLOR_SELECTOR_DATA)
+          }
+        />
+      )}
       <Col className="current-user-hand fixed-bottom" sm="12">
         {player.cards.map((card, idx) => {
           let cardProps = {

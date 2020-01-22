@@ -4,7 +4,8 @@ const {
   sanitizePlayer,
   isPlayerTurn,
   updateCurrentPlayerTurnIndex,
-  canPlayCard
+  canPlayCard,
+  colors
 } = require('./gameLogic.utils');
 
 function gameLogic(
@@ -84,7 +85,7 @@ function gameLogic(
     return sendMessage('This game does not exist', true, socket);
   });
 
-  socket.on('playCard', cardIndex => {
+  socket.on('playCard', ({ cardIndex, colorIndex }) => {
     const roomId = Object.keys(socket.rooms)[0];
     const currentGame = currentGames[roomId];
     let { currentCard, players } = currentGame;
@@ -105,6 +106,7 @@ function gameLogic(
       currentGame.currentPlayerTurnIndex = updateCurrentPlayerTurnIndex(
         currentGame
       );
+
       currentGame.currentCard = card;
       console.log(`${username} played ${JSON.stringify(card)}`);
       players.find(player => {
@@ -133,12 +135,22 @@ function gameLogic(
           }
           break;
         }
+        case '+4':
         case '+2': {
           const playerToDrawIndex = updateCurrentPlayerTurnIndex(currentGame);
           const playerToDrawUsername = players[playerToDrawIndex].name;
           const randomCards = [];
+          currentGame.currentPlayerTurnIndex = updateCurrentPlayerTurnIndex(
+            currentGame
+          );
+          let cardsToGenerate = 2;
 
-          for (let i = 0; i < 2; i++) {
+          if (cardType === '+4') {
+            cardToPlay.color = colors[colorIndex];
+            cardsToGenerate = 4;
+          }
+
+          for (let i = 0; i < cardsToGenerate; i++) {
             randomCards.push(generateRandomCard());
           }
           players[playerToDrawIndex].cards = [
@@ -163,6 +175,9 @@ function gameLogic(
             });
           });
           break;
+        }
+        case 'wild': {
+          cardToPlay.color = colors[colorIndex];
         }
       }
       playCard(cardToPlay);
