@@ -1,18 +1,18 @@
 import React, { useEffect, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import socket from '../../socket.io/socketConnection';
 
 import { selectAvailableGames } from '../../redux/games/games.selectors';
+import { selectSocketConnection } from '../../redux/socket/socket.selectors';
 
 import Table from 'react-bootstrap/Table';
 
 import Game from '../game/game';
 
-const Games = ({ availableGames }) => {
+const Games = ({ availableGames, socket }) => {
   useEffect(() => {
     socket.emit('requestAvailableGames');
-  }, []);
+  }, [socket]);
   return (
     <Fragment>
       <Table striped bordered hover borderless variant="dark">
@@ -35,7 +35,8 @@ const Games = ({ availableGames }) => {
 };
 
 const mapStateToProps = createStructuredSelector({
-  availableGames: selectAvailableGames
+  availableGames: selectAvailableGames,
+  socket: selectSocketConnection
 });
 
 export default connect(mapStateToProps)(Games);

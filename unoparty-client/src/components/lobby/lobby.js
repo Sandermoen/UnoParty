@@ -1,35 +1,36 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import socket from '../../socket.io/socketConnection';
 import { withRouter } from 'react-router-dom';
 
 import { addPlayer, initGame } from '../../redux/games/games.actions';
 import { updateCurrentGameCurrentCard } from '../../redux/games/games.actions';
 
 import { selectCurrentGame } from '../../redux/games/games.selectors';
+import { selectSocketConnection } from '../../redux/socket/socket.selectors';
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Jumbotron from 'react-bootstrap/Jumbotron';
 import Button from 'react-bootstrap/Button';
 import Badge from 'react-bootstrap/Badge';
 
 import PlayerAvatar from '../playerAvatar/playerAvatar';
+import CustomJumbotron from '../customJumbotron/customJumbotron';
 
 import './lobby.styles.css';
-
-const startGame = roomId => {
-  socket.emit('startGame', roomId);
-};
 
 const Lobby = ({
   currentGame: { maxPlayers, name, players, host, isHost, roomId, inLobby },
   addPlayer,
   initGame,
   history,
-  updateCurrentGameCurrentCard
+  updateCurrentGameCurrentCard,
+  socket
 }) => {
+  const startGame = roomId => {
+    socket.emit('startGame', roomId);
+  };
+
   useEffect(() => {
     socket.on('initGame', data => {
       socket.on('currentCard', card => {
@@ -41,11 +42,11 @@ const Lobby = ({
     socket.on('playerJoin', player => {
       addPlayer(player);
     });
-  }, [addPlayer, history, initGame, updateCurrentGameCurrentCard]);
+  }, [addPlayer, history, initGame, updateCurrentGameCurrentCard, socket]);
   return (
     <Row className="lobby">
       <Col xl="6" sm="12">
-        <Jumbotron className="bg-dark lobby-jumbotron">
+        <CustomJumbotron className="bg-dark lobby-jumbotron">
           <h1 className="lobby-name">Game: {name}</h1>
           <Row className="lobby-details">
             <Col sm="6" className="lobby-players">
@@ -66,14 +67,15 @@ const Lobby = ({
               ) : null}
             </Col>
           </Row>
-        </Jumbotron>
+        </CustomJumbotron>
       </Col>
     </Row>
   );
 };
 
 const mapStateToProps = createStructuredSelector({
-  currentGame: selectCurrentGame
+  currentGame: selectCurrentGame,
+  socket: selectSocketConnection
 });
 
 const mapDispatchToProps = dispatch => ({

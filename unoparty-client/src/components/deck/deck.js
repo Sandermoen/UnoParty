@@ -1,9 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import socket from '../../socket.io/socketConnection';
 
 import { selectCurrentGame } from '../../redux/games/games.selectors';
+import { selectSocketConnection } from '../../redux/socket/socket.selectors';
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -11,11 +11,11 @@ import Col from 'react-bootstrap/Col';
 import UnoCard from '../unoCard/unoCard';
 import UnoCardBackside from '../unoCardBackside/unoCardBackside';
 
-const drawCard = () => {
-  socket.emit('requestCard');
-};
+const Deck = ({ currentGame: { currentCard }, socket }) => {
+  const drawCard = () => {
+    socket.emit('requestCard');
+  };
 
-const Deck = ({ currentGame: { currentCard } }) => {
   return (
     <Row style={{ height: '33.3vh' }}>
       <Col
@@ -43,7 +43,8 @@ const Deck = ({ currentGame: { currentCard } }) => {
 };
 
 const mapStateToProps = createStructuredSelector({
-  currentGame: selectCurrentGame
+  currentGame: selectCurrentGame,
+  socket: selectSocketConnection
 });
 
 export default connect(mapStateToProps)(Deck);

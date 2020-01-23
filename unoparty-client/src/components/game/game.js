@@ -1,14 +1,15 @@
 import React from 'react';
-import socket from '../../socket.io/socketConnection';
+import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
+
+import { selectSocketConnection } from '../../redux/socket/socket.selectors';
 
 import Button from 'react-bootstrap/Button';
 
-const handleClick = roomId => {
-  socket.emit('joinGame', { roomId });
-};
-
-const Game = ({ name, playerCount, host, maxPlayers, roomId }) => {
-  console.log(roomId);
+const Game = ({ name, playerCount, host, maxPlayers, roomId, socket }) => {
+  const handleClick = roomId => {
+    socket.emit('joinGame', { roomId });
+  };
   return (
     <tr>
       <td>{name}</td>
@@ -29,4 +30,8 @@ const Game = ({ name, playerCount, host, maxPlayers, roomId }) => {
   );
 };
 
-export default Game;
+const mapStateToProps = createStructuredSelector({
+  socket: selectSocketConnection
+});
+
+export default connect(mapStateToProps)(Game);

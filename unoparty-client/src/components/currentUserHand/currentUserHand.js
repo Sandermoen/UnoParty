@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import socket from '../../socket.io/socketConnection';
 
 import { selectPlayerName } from '../../redux/player/player.selector';
 import { selectCurrentGamePlayers } from '../../redux/games/games.selectors';
+import { selectSocketConnection } from '../../redux/socket/socket.selectors';
 
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
@@ -14,7 +14,7 @@ import './currentUserHand.styles.css';
 import UnoCard from '../unoCard/unoCard';
 import ColorSelector from '../colorSelector/colorSelector';
 
-const CurrentUserHand = ({ playerName, currentGamePlayers }) => {
+const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
   const INITIAL_COLOR_SELECTOR_DATA = {
     show: false,
     cardIndex: ''
@@ -67,7 +67,8 @@ const CurrentUserHand = ({ playerName, currentGamePlayers }) => {
 
 const mapStateToProps = createStructuredSelector({
   playerName: selectPlayerName,
-  currentGamePlayers: selectCurrentGamePlayers
+  currentGamePlayers: selectCurrentGamePlayers,
+  socket: selectSocketConnection
 });
 
 export default connect(mapStateToProps)(CurrentUserHand);

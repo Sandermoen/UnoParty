@@ -15,12 +15,6 @@
   padding-bottom: 10px;
 }
 
-.game-browser-jumbotron {
-  border-bottom: 5px solid #31373c;
-  box-shadow: 0px 5px 10px 0px #333333;
-  border-radius: 15px;
-}
-
 .game-browser-empty {
   color: white;
   text-align: center;
@@ -28,6 +22,7 @@
 
 .game-browser-empty svg {
   height: 200px;
+  width: auto;
 }
 
 .game-browser-empty h3 {

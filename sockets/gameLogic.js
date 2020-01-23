@@ -106,6 +106,7 @@ function gameLogic(
       currentGame.currentPlayerTurnIndex = updateCurrentPlayerTurnIndex(
         currentGame
       );
+      if (currentGame.restrictDraw) currentGame.restrictDraw = false;
 
       currentGame.currentCard = card;
       console.log(`${username} played ${JSON.stringify(card)}`);
@@ -187,11 +188,11 @@ function gameLogic(
   socket.on('requestCard', () => {
     const roomId = Object.keys(socket.rooms)[0];
     const currentGame = currentGames[roomId];
-    const { currentCard } = currentGame;
+    let { currentCard, restrictDraw } = currentGame;
     const player = isPlayerTurn(currentGame, username);
     const playerIdx = currentGame.currentPlayerTurnIndex;
 
-    if (!player) {
+    if (!player || restrictDraw) {
       return sendMessage('Error drawing card', true, socket);
     }
 
@@ -200,6 +201,8 @@ function gameLogic(
       currentGame.currentPlayerTurnIndex = updateCurrentPlayerTurnIndex(
         currentGame
       );
+    } else {
+      currentGame.restrictDraw = true;
     }
 
     currentGame.players[playerIdx].cards.push(randomCard);

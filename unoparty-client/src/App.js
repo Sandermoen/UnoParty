@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
-import socket from './socket.io/socketConnection';
 import { withRouter } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
 
 import { updateAvailableGames } from './redux/games/games.actions';
 import { updateCurrentGame } from './redux/games/games.actions';
 import { selectCurrentGame } from './redux/games/games.selectors';
+import { selectSocketConnection } from './redux/socket/socket.selectors';
 import { setPlayerName } from './redux/player/player.actions';
 
 import Container from 'react-bootstrap/Container';
@@ -17,30 +17,35 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.styles.css';
 
 import Logo from './components/logo/logo';
+import ProtectedRoute from './components/protectedRoute/protectedRoute';
 import GameBrowserPage from './pages/gameBrowserPage/gameBrowserPage';
 import GameLobbyPage from './pages/gameLobbyPage/gameLobbyPage';
 import GamePage from './pages/gamePage/gamePage';
+import LoginForm from './components/loginForm/loginForm';
 
 const App = ({
   updateAvailableGames,
   updateCurrentGame,
   history,
-  currentGame: { inLobby }
+  currentGame: { inLobby },
+  socket
 }) => {
   const [alert, setAlert] = useState({});
   useEffect(() => {
-    socket.emit('requestAvailableGames');
-    socket.on('availableGames', data => {
-      updateAvailableGames(data);
-    });
-    socket.on('joinedGame', game => {
-      updateCurrentGame(game);
-      history.push('/lobby');
-    });
-    socket.on('message', message => {
-      setAlert(message);
-    });
-  }, [updateAvailableGames, updateCurrentGame, history]);
+    if (socket) {
+      socket.emit('requestAvailableGames');
+      socket.on('availableGames', data => {
+        updateAvailableGames(data);
+      });
+      socket.on('joinedGame', game => {
+        updateCurrentGame(game);
+        history.push('/lobby');
+      });
+      socket.on('message', message => {
+        setAlert(message);
+      });
+    }
+  }, [updateAvailableGames, updateCurrentGame, history, socket]);
   return (
     <Container fluid className="app">
       {alert.message && (
@@ -49,17 +54,21 @@ const App = ({
       <Logo
         watermark={history.location.pathname === '/' || inLobby ? false : true}
       />
-      <Switch>
-        <Route exact path="/">
-          <GameBrowserPage />
-        </Route>
-        <Route path="/lobby">
-          <GameLobbyPage />
-        </Route>
-        <Route path="/game">
-          <GamePage />
-        </Route>
-      </Switch>
+      {socket ? (
+        <Switch>
+          <Route exact path="/">
+            <GameBrowserPage />
+          </Route>
+          <ProtectedRoute path="/lobby">
+            <GameLobbyPage />
+          </ProtectedRoute>
+          <ProtectedRoute path="/game">
+            <GamePage />
+          </ProtectedRoute>
+        </Switch>
+      ) : (
+        <LoginForm />
+      )}
     </Container>
   );
 };
@@ -71,7 +80,8 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const mapStateToProps = createStructuredSelector({
-  currentGame: selectCurrentGame
+  currentGame: selectCurrentGame,
+  socket: selectSocketConnection
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App));

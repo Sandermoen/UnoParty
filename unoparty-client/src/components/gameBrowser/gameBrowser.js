@@ -4,7 +4,6 @@ import { createStructuredSelector } from 'reselect';
 
 import { selectAvailableGames } from '../../redux/games/games.selectors';
 
-import Jumbotron from 'react-bootstrap/Jumbotron';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
@@ -13,6 +12,7 @@ import './gameBrowser.styles.css';
 
 import Games from '../games/games';
 import CreateGameModal from '../createGameModal/createGameModal';
+import CustomJumbotron from '../customJumbotron/customJumbotron';
 import { ReactComponent as GameBrowserEmptySvg } from '../../assets/svg/gameBrowserEmpty.svg';
 
 const GameBrowser = ({ availableGames }) => {
@@ -24,7 +24,7 @@ const GameBrowser = ({ availableGames }) => {
         handleHide={() => setShowCreateGameModal(false)}
       />
       <Col xl="6" sm="12">
-        <Jumbotron className="bg-dark game-browser-jumbotron">
+        <CustomJumbotron className="bg-dark game-browser-jumbotron">
           {availableGames.length > 0 ? (
             <Fragment>
               {' '}
@@ -44,7 +44,7 @@ const GameBrowser = ({ availableGames }) => {
             <div className="game-browser-empty">
               <GameBrowserEmptySvg />
               <h3>Could Not Find Any Games To Join</h3>
-              <h4>Why Not Create One Yourself?</h4>
+              <h4>Why not create one yourself?</h4>
               <Button
                 style={{ width: '20%', marginTop: '10px' }}
                 variant="success"
@@ -54,7 +54,7 @@ const GameBrowser = ({ availableGames }) => {
               </Button>
             </div>
           )}
-        </Jumbotron>
+        </CustomJumbotron>
       </Col>
     </Row>
   );

@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import socket from '../../socket.io/socketConnection';
 import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
 
 import { playCard } from '../../redux/games/games.actions';
 import { addPlayerCard } from '../../redux/games/games.actions';
+
+import { selectSocketConnection } from '../../redux/socket/socket.selectors';
 
 import './gamePage.styles.css';
 
@@ -11,7 +13,7 @@ import OpponentHand from '../../components/opponentHand/opponentHand';
 import CurrentUserHand from '../../components/currentUserHand/currentUserHand';
 import Deck from '../../components/deck/deck';
 
-const GamePage = ({ playCard, addPlayerCard }) => {
+const GamePage = ({ playCard, addPlayerCard, socket }) => {
   useEffect(() => {
     socket.on('cardPlayed', data => {
       const {
@@ -25,7 +27,7 @@ const GamePage = ({ playCard, addPlayerCard }) => {
     socket.on('drawnCard', ({ playerIdx, randomCards, numCards }) => {
       addPlayerCard(playerIdx, randomCards, numCards);
     });
-  }, [playCard, addPlayerCard]);
+  }, [playCard, addPlayerCard, socket]);
   return (
     <div className="game-container">
       <OpponentHand />
@@ -44,4 +46,8 @@ const mapDispatchToProps = dispatch => ({
     dispatch(addPlayerCard(playerIdx, cards, numCards))
 });
 
-export default connect(null, mapDispatchToProps)(GamePage);
+const mapStateToProps = createStructuredSelector({
+  socket: selectSocketConnection
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(GamePage);

@@ -1,11 +1,14 @@
 import React from 'react';
-import socket from '../../socket.io/socketConnection';
+import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
+
+import { selectSocketConnection } from '../../redux/socket/socket.selectors';
 
 import './colorSelector.styles.css';
 
 import Button from 'react-bootstrap/Button';
 
-const ColorSelector = ({ cardIndex, hideColorSelector }) => {
+const ColorSelector = ({ cardIndex, hideColorSelector, socket }) => {
   const colors = [
     { color: 'Red', bootStrapColor: 'danger' },
     { color: 'Green', bootStrapColor: 'success' },
@@ -34,4 +37,8 @@ const ColorSelector = ({ cardIndex, hideColorSelector }) => {
   );
 };
 
-export default ColorSelector;
+const mapStateToProps = createStructuredSelector({
+  socket: selectSocketConnection
+});
+
+export default connect(mapStateToProps)(ColorSelector);

@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
-import socket from '../../socket.io/socketConnection';
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { createStructuredSelector } from 'reselect';
 
 import { updateCurrentGame } from '../../redux/games/games.actions';
+
+import { selectSocketConnection } from '../../redux/socket/socket.selectors';
 
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
-const CreateGameForm = ({ history, updateCurrentGame }) => {
+const CreateGameForm = ({ history, updateCurrentGame, socket }) => {
   const [gameName, setGameName] = useState('');
   const [maxPlayers, setMaxPlayers] = useState(2);
   const [formError, setFormError] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = event => {
+    event.preventDefault();
     if (gameName.length > 10) {
       return setFormError('A game name must be 10 characters or less');
     } else if (maxPlayers > 5 || maxPlayers < 2) {
@@ -31,15 +34,13 @@ const CreateGameForm = ({ history, updateCurrentGame }) => {
       passwordProtected: false
     });
     socket.on('gameCreated', data => {
-      // game has been created set current game in redux store to data in callback and redirect to lobby
-      console.log(data);
       updateCurrentGame(data);
       history.push('/lobby');
     });
   };
 
   return (
-    <Form>
+    <Form onSubmit={event => handleSubmit(event)}>
       {formError ? <p style={{ color: 'red' }}>{formError}</p> : null}
       <Row style={{ padding: '10px 0' }}>
         <Col>
@@ -57,7 +58,7 @@ const CreateGameForm = ({ history, updateCurrentGame }) => {
           />
         </Col>
       </Row>
-      <Button onClick={() => handleSubmit()} variant="success">
+      <Button variant="success" type="submit">
         Create Game
       </Button>
     </Form>
@@ -68,4 +69,11 @@ const mapDispatchToProps = dispatch => ({
   updateCurrentGame: game => dispatch(updateCurrentGame(game))
 });
 
-export default connect(null, mapDispatchToProps)(withRouter(CreateGameForm));
+const mapStateToProps = createStructuredSelector({
+  socket: selectSocketConnection
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withRouter(CreateGameForm));
