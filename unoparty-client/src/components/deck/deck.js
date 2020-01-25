@@ -25,13 +25,16 @@ const Deck = ({ currentGame: { currentCard }, socket }) => {
           alignItems: 'center'
         }}
       >
-        {currentCard && (
+        {currentCard ? (
           <UnoCard
             additionalStyles={{ marginRight: '5px' }}
             number={currentCard.number}
             cardType={currentCard.type}
             color={currentCard.color}
+            className="deck-card"
           />
+        ) : (
+          <UnoCardBackside additionalStyles={{ marginRight: '5px' }} />
         )}
         <UnoCardBackside
           drawCard={() => drawCard()}

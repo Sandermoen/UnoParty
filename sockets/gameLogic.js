@@ -27,10 +27,7 @@ function gameLogic(
 
       gameToStart.players.forEach((player, idx) => {
         for (let i = 0; i < 7; i++) {
-          gameToStart.players[idx].cards.push({
-            ...generateRandomCard(),
-            key: i
-          });
+          gameToStart.players[idx].cards.push(generateRandomCard());
         }
       });
 

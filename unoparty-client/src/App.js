@@ -46,6 +46,7 @@ const App = ({
       });
     }
   }, [updateAvailableGames, updateCurrentGame, history, socket]);
+
   return (
     <Container fluid className="app">
       {alert.message && (

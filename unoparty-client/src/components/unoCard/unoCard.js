@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react';
+import { animated } from 'react-spring';
 
 import { ReactComponent as ReverseIcon } from '../../assets/svg/unoCardReverseIcon.svg';
 
@@ -7,7 +8,14 @@ import './unoCard.styles.css';
 import MiniCard from '../miniCard/miniCard';
 import UnoCardWildCircle from '../unoCardWildCircle/unoCardWildCircle';
 
-const UnoCard = ({ number, color, additionalStyles, cardType, playCard }) => {
+const UnoCard = ({
+  number,
+  color,
+  additionalStyles,
+  cardType,
+  playCard,
+  className
+}) => {
   const renderUnoCard = () => {
     switch (cardType) {
       case 'skip':
@@ -145,13 +153,13 @@ const UnoCard = ({ number, color, additionalStyles, cardType, playCard }) => {
   };
 
   return (
-    <div
+    <animated.div
       style={{ background: color, ...additionalStyles }}
-      className="uno-card"
+      className={`uno-card ${className ? className : ''}`}
       onClick={playCard}
     >
       {renderUnoCard()}
-    </div>
+    </animated.div>
   );
 };
 

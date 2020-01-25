@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
+import { useTransition } from 'react-spring';
 
 import { selectPlayerName } from '../../redux/player/player.selector';
 import { selectCurrentGamePlayers } from '../../redux/games/games.selectors';
@@ -19,12 +20,20 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
     show: false,
     cardIndex: ''
   };
+  const [deckCardPosition, setDeckCardPosition] = useState({
+    from: { opacity: 0, top: '0px', left: '0px' },
+    enter: { opacity: 1, top: '0px', left: '0px' },
+    leave: {
+      top: `0px`,
+      left: `0px`
+    }
+  });
   const [colorSelectorData, setColorSelectorData] = useState(
     INITIAL_COLOR_SELECTOR_DATA
   );
   const player = currentGamePlayers.find(player => player.name === playerName);
 
-  const playCard = cardIndex => {
+  const playCard = (cardIndex, key) => {
     const playerCard = player.cards[cardIndex];
     if (!playerCard) {
       return alert('card does not exist');
@@ -32,8 +41,32 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
     if (playerCard.type === '+4' || playerCard.type === 'wild') {
       return setColorSelectorData({ show: true, cardIndex });
     }
+    const top =
+      document.querySelector(`._${key}`).getBoundingClientRect().top -
+      document.querySelector('.deck-card').getBoundingClientRect().top;
+
+    let left =
+      document.querySelector(`._${key}`).getBoundingClientRect().left -
+      document.querySelector('.deck-card').getBoundingClientRect().left;
+
+    left = Number.isInteger(left) ? -left : Math.abs(left);
+
+    setDeckCardPosition({
+      ...deckCardPosition,
+      leave: {
+        top: `-${top}px`,
+        left: `${left}px`
+      }
+    });
+
     socket.emit('playCard', { cardIndex });
   };
+
+  const transitions = useTransition(
+    player.cards,
+    cards => cards.key,
+    deckCardPosition
+  );
 
   return (
     <Row
@@ -49,16 +82,21 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
         />
       )}
       <Col className="current-user-hand fixed-bottom" sm="12">
-        {player.cards.map((card, idx) => {
+        {transitions.map(({ item, props, key }, idx) => {
           let cardProps = {
-            playCard: () => playCard(idx),
-            key: idx,
-            color: card.color,
-            cardType: card.type
+            playCard: () => playCard(idx, key),
+            key,
+            color: item.color,
+            cardType: item.type
           };
-          if (card.number !== undefined) cardProps.number = card.number;
-
-          return <UnoCard {...cardProps} />;
+          if (item.number !== undefined) cardProps.number = item.number;
+          return (
+            <UnoCard
+              {...cardProps}
+              additionalStyles={props}
+              className={`_${key}`}
+            />
+          );
         })}
       </Col>
     </Row>

@@ -1,3 +1,5 @@
+const uniqid = require('uniqid');
+
 const colors = [
   'rgb(254, 39, 39)',
   'rgb(8, 186, 34)',
@@ -5,7 +7,7 @@ const colors = [
   'rgb(240, 206, 7)'
 ];
 
-const generateRandomCard = () => {
+const generateRandomCard = key => {
   const randomType = Math.floor(Math.random() * 109) + 1;
   const randomNumber = Math.floor(Math.random() * 10);
   let randomColor = colors[Math.floor(Math.random() * 4)];
@@ -13,40 +15,46 @@ const generateRandomCard = () => {
 
   switch (true) {
     case randomType < 3:
-      return (randomCard = {
+      randomCard = {
         type: '+4',
         color: 'rgb(42, 42, 42)',
         number: '+4'
-      });
+      };
+      break;
     case randomType < 5 && randomType > 2:
-      return (randomCard = {
+      randomCard = {
         type: 'wild',
         color: 'rgb(42, 42, 42)'
-      });
+      };
+      break;
     case randomType < 9 && randomType > 4:
-      return (randomCard = {
+      randomCard = {
         type: '+2',
         color: randomColor,
         number: '+2'
-      });
+      };
+      break;
     case randomType < 13 && randomType > 8:
-      return (randomCard = {
+      randomCard = {
         type: 'reverse',
         color: randomColor
-      });
+      };
+      break;
     case randomType < 17 && randomType > 12:
-      return (randomCard = {
+      randomCard = {
         type: 'skip',
         color: randomColor
-      });
+      };
+      break;
     default:
-      return (randomCard = {
+      randomCard = {
         type: 'normal',
         number: randomNumber,
         color: randomColor
-      });
+      };
+      break;
   }
-  return randomCard;
+  return { key: uniqid(), ...randomCard };
 };
 
 const sanitizePlayer = (currentGame, username) => {

@@ -38,7 +38,6 @@ export const removePlayerCard = (playerIdx, cardIdx) => ({
 });
 
 export const addPlayerCard = (playerIdx, cards, numCards) => {
-  console.log(numCards);
   return {
     type: gamesTypes.ADD_PLAYER_CARD,
     payload: {
