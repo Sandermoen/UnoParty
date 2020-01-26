@@ -37,6 +37,10 @@ const CreateGameForm = ({ history, updateCurrentGame, socket }) => {
       updateCurrentGame(data);
       history.push('/lobby');
     });
+
+    return () => {
+      socket.off('gameCreated');
+    };
   };
 
   return (

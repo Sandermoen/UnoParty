@@ -80,5 +80,35 @@ io.on('connect', socket => {
     sendAvailableGames();
   });
 
+  socket.on('leaveGame', () => {
+    const roomId = Object.keys(socket.rooms)[0];
+    if (!currentGames[roomId]) {
+      return console.log('could not find the room');
+    }
+    console.log(
+      currentGames[roomId].players.filter(player => player.name === username)
+    );
+    const players = currentGames[roomId].players;
+    let playerIdx = players.findIndex(player => player.name === username);
+
+    if (!playerIdx) {
+      return console.log('couldnt find player');
+    }
+    currentGames[roomId].players.splice(playerIdx, 1);
+
+    socket.leave(roomId, err => {
+      if (err) {
+        throw new Error(err);
+      }
+      console.log('player left room ', roomId);
+    });
+
+    io.to(roomId).emit('playerLeave', playerIdx);
+  });
+
+  socket.on('disconnect', reason => {
+    console.log(`Socket disconnected: ${reason}`);
+  });
+
   gameLogic(currentGames, socket, sendAvailableGames, username, sendMessage);
 });

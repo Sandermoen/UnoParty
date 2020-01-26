@@ -42,6 +42,11 @@ const Lobby = ({
     socket.on('playerJoin', player => {
       addPlayer(player);
     });
+
+    return () => {
+      socket.off('initGame');
+      socket.off('playerJoin');
+    };
   }, [addPlayer, history, initGame, updateCurrentGameCurrentCard, socket]);
   return (
     <Row className="lobby">

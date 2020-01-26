@@ -15,6 +15,11 @@ export const addPlayer = player => ({
   payload: player
 });
 
+export const removePlayer = playerIdx => ({
+  type: gamesTypes.REMOVE_PLAYER,
+  payload: playerIdx
+});
+
 export const updateCurrentGameLobbyState = () => ({
   type: gamesTypes.UPDATE_CURRENT_GAME_LOBBY_STATE
 });
@@ -27,6 +32,10 @@ export const updateCurrentGamePlayers = players => ({
 export const updateCurrentGameCurrentCard = card => ({
   type: gamesTypes.UPDATE_CURRENT_GAME_CURRENT_CARD,
   payload: card
+});
+
+export const clearCurrentGame = () => ({
+  type: gamesTypes.CLEAR_CURRENT_GAME
 });
 
 export const removePlayerCard = (playerIdx, cardIdx) => ({

@@ -8,7 +8,12 @@ import './colorSelector.styles.css';
 
 import Button from 'react-bootstrap/Button';
 
-const ColorSelector = ({ cardIndex, hideColorSelector, socket }) => {
+const ColorSelector = ({
+  cardIndex,
+  hideColorSelector,
+  setDeckCardPosition,
+  socket
+}) => {
   const colors = [
     { color: 'Red', bootStrapColor: 'danger' },
     { color: 'Green', bootStrapColor: 'success' },
@@ -18,6 +23,7 @@ const ColorSelector = ({ cardIndex, hideColorSelector, socket }) => {
 
   const handleClick = event => {
     socket.emit('playCard', { cardIndex, colorIndex: event.target.value });
+    setDeckCardPosition();
     return hideColorSelector();
   };
 

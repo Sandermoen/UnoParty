@@ -38,9 +38,7 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
     if (!playerCard) {
       return alert('card does not exist');
     }
-    if (playerCard.type === '+4' || playerCard.type === 'wild') {
-      return setColorSelectorData({ show: true, cardIndex });
-    }
+
     const top =
       document.querySelector(`._${key}`).getBoundingClientRect().top -
       document.querySelector('.deck-card').getBoundingClientRect().top;
@@ -51,13 +49,23 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
 
     left = Number.isInteger(left) ? -left : Math.abs(left);
 
-    setDeckCardPosition({
+    const positionData = {
       ...deckCardPosition,
       leave: {
         top: `-${top}px`,
         left: `${left}px`
       }
-    });
+    };
+
+    if (playerCard.type === '+4' || playerCard.type === 'wild') {
+      return setColorSelectorData({
+        show: true,
+        cardIndex,
+        setDeckCardPosition: () => setDeckCardPosition(positionData)
+      });
+    }
+
+    setDeckCardPosition(positionData);
 
     socket.emit('playCard', { cardIndex });
   };
@@ -75,7 +83,7 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
     >
       {colorSelectorData.show && (
         <ColorSelector
-          cardIndex={colorSelectorData.cardIndex}
+          {...colorSelectorData}
           hideColorSelector={() =>
             setColorSelectorData(INITIAL_COLOR_SELECTOR_DATA)
           }

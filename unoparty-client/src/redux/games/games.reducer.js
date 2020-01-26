@@ -27,6 +27,14 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
         currentGame: { ...state.currentGame, players: addedPlayer }
       };
     }
+    case gamesTypes.REMOVE_PLAYER: {
+      const players = deepCopyArray(state.currentGame.players);
+      players.splice(action.payload, 1);
+      return {
+        ...state,
+        currentGame: { ...state.currentGame, players }
+      };
+    }
     case gamesTypes.UPDATE_CURRENT_GAME_LOBBY_STATE: {
       return {
         ...state,
@@ -53,6 +61,9 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
           currentCard: action.payload
         }
       };
+    }
+    case gamesTypes.CLEAR_CURRENT_GAME: {
+      return { ...state, currentGame: [] };
     }
     case gamesTypes.REMOVE_PLAYER_CARD: {
       const { playerIdx, cardIdx } = action.payload;
