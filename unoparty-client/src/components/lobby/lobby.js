@@ -3,8 +3,12 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { withRouter } from 'react-router-dom';
 
-import { addPlayer, initGame } from '../../redux/games/games.actions';
-import { updateCurrentGameCurrentCard } from '../../redux/games/games.actions';
+import {
+  addPlayer,
+  initGame,
+  updateCurrentGameCurrentCard,
+  clearCurrentGame
+} from '../../redux/games/games.actions';
 
 import { selectCurrentGame } from '../../redux/games/games.selectors';
 import { selectSocketConnection } from '../../redux/socket/socket.selectors';
@@ -20,13 +24,15 @@ import CustomJumbotron from '../customJumbotron/customJumbotron';
 import './lobby.styles.css';
 
 const Lobby = ({
-  currentGame: { maxPlayers, name, players, host, isHost, roomId, inLobby },
+  currentGame,
   addPlayer,
   initGame,
   history,
   updateCurrentGameCurrentCard,
-  socket
+  socket,
+  clearCurrentGame
 }) => {
+  const { maxPlayers, name, players, host, isHost, roomId } = currentGame;
   const startGame = roomId => {
     socket.emit('startGame', roomId);
   };
@@ -46,8 +52,20 @@ const Lobby = ({
     return () => {
       socket.off('initGame');
       socket.off('playerJoin');
+      if (currentGame.length > 0) {
+        socket.emit('leaveLobby');
+        clearCurrentGame();
+      }
     };
-  }, [addPlayer, history, initGame, updateCurrentGameCurrentCard, socket]);
+  }, [
+    addPlayer,
+    history,
+    initGame,
+    updateCurrentGameCurrentCard,
+    socket,
+    clearCurrentGame,
+    currentGame
+  ]);
   return (
     <Row className="lobby">
       <Col xl="6" sm="12">
@@ -87,7 +105,8 @@ const mapDispatchToProps = dispatch => ({
   addPlayer: player => dispatch(addPlayer(player)),
   initGame: players => dispatch(initGame(players)),
   updateCurrentGameCurrentCard: card =>
-    dispatch(updateCurrentGameCurrentCard(card))
+    dispatch(updateCurrentGameCurrentCard(card)),
+  clearCurrentGame: () => dispatch(clearCurrentGame())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Lobby));

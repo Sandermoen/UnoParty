@@ -1,4 +1,5 @@
 const { io } = require('../servers');
+const Game = require('../classes/Game');
 const gameLogic = require('./gameLogic');
 
 let currentGames = {};
@@ -49,61 +50,17 @@ io.on('connect', socket => {
     if (!maxPlayers || !name)
       return sendMessage('Please provide all the info needed', true, socket);
     const roomId = `${Math.floor(Math.random() * 9999) + 1}`;
-    const gameSettings = {
-      passwordProtected: false,
-      playerCount: 1,
-      maxPlayers,
-      name,
-      roomId,
-      inLobby: true,
-      host: username,
-      players: [
-        {
-          name: username,
-          cards: [],
-          score: 0
-        }
-      ],
-      currentPlayerTurnIndex: 0,
-      turnReverse: false,
-      restrictDraw: false
-    };
+    const game = new Game(maxPlayers, name, roomId, username);
     currentGames[roomId] = {
-      ...gameSettings,
+      ...game,
       hostSocket: socket.id
     };
     socket.join(`${roomId}`);
     socket.emit('gameCreated', {
-      ...gameSettings,
+      ...game,
       isHost: true
     });
     sendAvailableGames();
-  });
-
-  socket.on('leaveGame', () => {
-    const roomId = Object.keys(socket.rooms)[0];
-    if (!currentGames[roomId]) {
-      return console.log('could not find the room');
-    }
-    console.log(
-      currentGames[roomId].players.filter(player => player.name === username)
-    );
-    const players = currentGames[roomId].players;
-    let playerIdx = players.findIndex(player => player.name === username);
-
-    if (!playerIdx) {
-      return console.log('couldnt find player');
-    }
-    currentGames[roomId].players.splice(playerIdx, 1);
-
-    socket.leave(roomId, err => {
-      if (err) {
-        throw new Error(err);
-      }
-      console.log('player left room ', roomId);
-    });
-
-    io.to(roomId).emit('playerLeave', playerIdx);
   });
 
   socket.on('disconnect', reason => {

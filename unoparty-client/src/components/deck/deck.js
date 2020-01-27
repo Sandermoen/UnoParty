@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 
@@ -12,9 +12,18 @@ import UnoCard from '../unoCard/unoCard';
 import UnoCardBackside from '../unoCardBackside/unoCardBackside';
 
 const Deck = ({ currentGame: { currentCard }, socket }) => {
+  const [currentDeckCard, setCurrentDeckCard] = useState(undefined);
+
   const drawCard = () => {
     socket.emit('requestCard');
   };
+
+  useEffect(() => {
+    if (!currentDeckCard) {
+      return setCurrentDeckCard(currentCard);
+    }
+    setTimeout(() => setCurrentDeckCard(currentCard), 500);
+  }, [currentCard, setCurrentDeckCard, currentDeckCard]);
 
   return (
     <Row style={{ height: '33.3vh' }}>
@@ -25,12 +34,12 @@ const Deck = ({ currentGame: { currentCard }, socket }) => {
           alignItems: 'center'
         }}
       >
-        {currentCard ? (
+        {currentDeckCard ? (
           <UnoCard
             additionalStyles={{ marginRight: '5px' }}
-            number={currentCard.number}
-            cardType={currentCard.type}
-            color={currentCard.color}
+            number={currentDeckCard.number}
+            cardType={currentDeckCard.type}
+            color={currentDeckCard.color}
             className="deck-card"
           />
         ) : (

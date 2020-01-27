@@ -5,8 +5,9 @@ import { createStructuredSelector } from 'reselect';
 import {
   playCard,
   addPlayerCard,
-  clearCurrentGame,
-  removePlayer
+  removePlayer,
+  updateCurrentGame,
+  clearCurrentGame
 } from '../../redux/games/games.actions';
 
 import { selectSocketConnection } from '../../redux/socket/socket.selectors';
@@ -21,10 +22,13 @@ const GamePage = ({
   playCard,
   addPlayerCard,
   socket,
-  clearCurrentGame,
-  removePlayer
+  removePlayer,
+  updateCurrentGame,
+  clearCurrentGame
 }) => {
   useEffect(() => {
+    let gameFinished = false;
+
     socket.on('cardPlayed', data => {
       const {
         cardPlayerIndex,
@@ -42,15 +46,30 @@ const GamePage = ({
       removePlayer(playerIdx);
     });
 
+    socket.on('gameFinished', currentGame => {
+      gameFinished = true;
+      updateCurrentGame(currentGame);
+    });
+
     return () => {
       socket.off('cardPlayed');
       socket.off('drawnCard');
       socket.off('playerLeave');
+      socket.off('gameFinished');
 
-      socket.emit('leaveGame');
-      clearCurrentGame();
+      if (!gameFinished) {
+        socket.emit('leaveGame');
+        clearCurrentGame();
+      }
     };
-  }, [playCard, addPlayerCard, socket, clearCurrentGame, removePlayer]);
+  }, [
+    playCard,
+    addPlayerCard,
+    socket,
+    removePlayer,
+    updateCurrentGame,
+    clearCurrentGame
+  ]);
   return (
     <div className="game-container">
       <OpponentHand />
@@ -67,8 +86,9 @@ const mapDispatchToProps = dispatch => ({
     ),
   addPlayerCard: (playerIdx, cards, numCards) =>
     dispatch(addPlayerCard(playerIdx, cards, numCards)),
-  clearCurrentGame: () => dispatch(clearCurrentGame()),
-  removePlayer: playerIdx => dispatch(removePlayer(playerIdx))
+  removePlayer: playerIdx => dispatch(removePlayer(playerIdx)),
+  updateCurrentGame: currentGame => dispatch(updateCurrentGame(currentGame)),
+  clearCurrentGame: () => dispatch(clearCurrentGame())
 });
 
 const mapStateToProps = createStructuredSelector({

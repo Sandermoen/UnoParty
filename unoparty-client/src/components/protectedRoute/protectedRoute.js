@@ -6,13 +6,23 @@ import { createStructuredSelector } from 'reselect';
 import { selectCurrentGame } from '../../redux/games/games.selectors';
 import { selectPlayerName } from '../../redux/player/player.selector';
 
-const ProtectedRoute = ({ children, currentGame, playerName, ...props }) => {
+const ProtectedRoute = ({
+  children,
+  currentGame,
+  playerName,
+  condition,
+  redirect,
+  ...props
+}) => {
   return (
     <Route
       {...props}
       render={() => {
         if (currentGame.length === 0 || !playerName) {
           return <Redirect to="/" />;
+        }
+        if (condition) {
+          return <Redirect to={redirect} />;
         }
         return children;
       }}

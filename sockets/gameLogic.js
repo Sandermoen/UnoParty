@@ -1,4 +1,5 @@
 const { io } = require('../servers');
+const Game = require('../classes/Game');
 const {
   generateRandomCard,
   sanitizePlayer,
@@ -208,6 +209,59 @@ function gameLogic(
       randomCards: [randomCard]
     });
     socket.to(String(roomId)).emit('drawnCard', { playerIdx, numCards: 1 });
+  });
+
+  socket.on('leaveGame', () => {
+    const roomId = Object.keys(socket.rooms)[0];
+    if (currentGames[roomId]) {
+      const currentGame = currentGames[roomId];
+      const players = currentGame.players;
+      let playerIdx = players.findIndex(player => player.name === username);
+
+      if (playerIdx) {
+        currentGames[roomId].players.splice(playerIdx, 1);
+
+        socket.leave(roomId, err => {
+          if (err) {
+            throw new Error(err);
+          }
+          console.log('player left room ', roomId);
+        });
+
+        if (currentGame.hostSocket === socket.id) {
+          // handle the host leaving the session
+        }
+
+        if (players.length === 1) {
+          players[0].cards = [];
+          const game = new Game(
+            currentGame.maxPlayers,
+            currentGame.name,
+            roomId,
+            currentGame.host,
+            players
+          );
+          currentGames[roomId] = {
+            ...game,
+            hostSocket: currentGame.hostSocket
+          };
+          sendAvailableGames();
+          return io.to(roomId).emit('gameFinished', { ...game, isHost: true });
+        }
+
+        let playerTurnIndex = currentGame.currentPlayerTurnIndex;
+        if (
+          playerTurnIndex === playerIdx &&
+          currentGame.players.length === playerTurnIndex
+        ) {
+          currentGame.currentPlayerTurnIndex = updateCurrentPlayerTurnIndex(
+            currentGame
+          );
+        }
+
+        io.to(roomId).emit('playerLeave', playerIdx);
+      }
+    }
   });
 }
 

@@ -123,7 +123,7 @@ const updateCurrentPlayerTurnIndex = currentGame => {
       ? (currentPlayerTurnIndex = 0)
       : (currentPlayerTurnIndex += 1);
   }
-  console.log('current turn index: ', currentGame.currentPlayerTurnIndex);
+  console.log('current turn index: ', currentPlayerTurnIndex);
   return currentPlayerTurnIndex;
 };
 

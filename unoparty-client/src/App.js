@@ -63,7 +63,7 @@ const App = ({
           <ProtectedRoute path="/lobby">
             <GameLobbyPage />
           </ProtectedRoute>
-          <ProtectedRoute path="/game">
+          <ProtectedRoute condition={inLobby} redirect="/lobby" path="/game">
             <GamePage />
           </ProtectedRoute>
         </Switch>
