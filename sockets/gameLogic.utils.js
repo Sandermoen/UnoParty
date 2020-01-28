@@ -163,6 +163,5 @@ module.exports = {
   isPlayerTurn,
   canPlayCard,
   updateCurrentPlayerTurnIndex,
-  colors,
-  leaveRoom
+  colors
 };
