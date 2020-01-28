@@ -58,7 +58,7 @@ const GamePage = ({
       socket.off('gameFinished');
 
       if (!gameFinished) {
-        socket.emit('leaveGame');
+        socket.emit('leaveRoom');
         clearCurrentGame();
       }
     };

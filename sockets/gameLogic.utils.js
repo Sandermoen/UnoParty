@@ -1,4 +1,6 @@
 const uniqid = require('uniqid');
+const Game = require('../classes/Game');
+const { io } = require('../servers');
 
 const colors = [
   'rgb(254, 39, 39)',
@@ -7,7 +9,34 @@ const colors = [
   'rgb(240, 206, 7)'
 ];
 
-const generateRandomCard = key => {
+const sendAvailableGames = currentGames => {
+  const availableGames = Object.values(currentGames).filter(
+    ({
+      playerCount,
+      maxPlayers,
+      name,
+      passwordProtected,
+      host,
+      roomId,
+      inLobby
+    }) => {
+      if (inLobby) {
+        return {
+          roomId,
+          playerCount,
+          maxPlayers,
+          name,
+          passwordProtected,
+          host,
+          inLobby
+        };
+      }
+    }
+  );
+  io.emit('availableGames', availableGames ? availableGames : []);
+};
+
+const generateRandomCard = () => {
   const randomType = Math.floor(Math.random() * 109) + 1;
   const randomNumber = Math.floor(Math.random() * 10);
   let randomColor = colors[Math.floor(Math.random() * 4)];
@@ -128,10 +157,12 @@ const updateCurrentPlayerTurnIndex = currentGame => {
 };
 
 module.exports = {
+  sendAvailableGames,
   generateRandomCard,
   sanitizePlayer,
   isPlayerTurn,
   canPlayCard,
   updateCurrentPlayerTurnIndex,
-  colors
+  colors,
+  leaveRoom
 };

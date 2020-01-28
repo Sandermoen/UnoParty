@@ -10,6 +10,11 @@ export const updateCurrentGame = currentGame => ({
   payload: currentGame
 });
 
+export const setCurrentGameHost = username => ({
+  type: gamesTypes.SET_CURRENT_GAME_HOST,
+  payload: username
+});
+
 export const addPlayer = player => ({
   type: gamesTypes.ADD_PLAYER,
   payload: player

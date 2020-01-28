@@ -20,6 +20,16 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
         currentGame: action.payload
       };
     }
+    case gamesTypes.SET_CURRENT_GAME_HOST: {
+      return {
+        ...state,
+        currentGame: {
+          ...state.currentGame,
+          isHost: true,
+          host: action.payload
+        }
+      };
+    }
     case gamesTypes.ADD_PLAYER: {
       const addedPlayer = [...state.currentGame.players, action.payload];
       return {

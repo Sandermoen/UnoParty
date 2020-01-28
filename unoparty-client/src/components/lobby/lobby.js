@@ -7,11 +7,14 @@ import {
   addPlayer,
   initGame,
   updateCurrentGameCurrentCard,
-  clearCurrentGame
+  clearCurrentGame,
+  removePlayer,
+  setCurrentGameHost
 } from '../../redux/games/games.actions';
 
 import { selectCurrentGame } from '../../redux/games/games.selectors';
 import { selectSocketConnection } from '../../redux/socket/socket.selectors';
+import { selectPlayerName } from '../../redux/player/player.selector';
 
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -30,7 +33,10 @@ const Lobby = ({
   history,
   updateCurrentGameCurrentCard,
   socket,
-  clearCurrentGame
+  clearCurrentGame,
+  removePlayer,
+  playerName,
+  setCurrentGameHost
 }) => {
   const { maxPlayers, name, players, host, isHost, roomId } = currentGame;
   const startGame = roomId => {
@@ -38,22 +44,36 @@ const Lobby = ({
   };
 
   useEffect(() => {
+    let gameStarted = false;
     socket.on('initGame', data => {
       socket.on('currentCard', card => {
         updateCurrentGameCurrentCard(card);
+        gameStarted = true;
+        initGame(data);
+        history.push('/game');
       });
-      initGame(data);
-      history.push('/game');
     });
     socket.on('playerJoin', player => {
       addPlayer(player);
     });
 
+    socket.on('newHost', username => {
+      setCurrentGameHost(username);
+    });
+
+    socket.on('playerLeave', playerIdx => {
+      removePlayer(playerIdx);
+    });
+
     return () => {
       socket.off('initGame');
+      socket.off('currentCard');
       socket.off('playerJoin');
-      if (currentGame.length > 0) {
-        socket.emit('leaveLobby');
+      socket.off('playerLeave');
+      socket.off('newHost');
+
+      if (!gameStarted) {
+        socket.emit('leaveRoom');
         clearCurrentGame();
       }
     };
@@ -64,7 +84,8 @@ const Lobby = ({
     updateCurrentGameCurrentCard,
     socket,
     clearCurrentGame,
-    currentGame
+    removePlayer,
+    setCurrentGameHost
   ]);
   return (
     <Row className="lobby">
@@ -98,7 +119,8 @@ const Lobby = ({
 
 const mapStateToProps = createStructuredSelector({
   currentGame: selectCurrentGame,
-  socket: selectSocketConnection
+  socket: selectSocketConnection,
+  playerName: selectPlayerName
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -106,7 +128,9 @@ const mapDispatchToProps = dispatch => ({
   initGame: players => dispatch(initGame(players)),
   updateCurrentGameCurrentCard: card =>
     dispatch(updateCurrentGameCurrentCard(card)),
-  clearCurrentGame: () => dispatch(clearCurrentGame())
+  clearCurrentGame: () => dispatch(clearCurrentGame()),
+  removePlayer: playerIdx => dispatch(removePlayer(playerIdx)),
+  setCurrentGameHost: username => dispatch(setCurrentGameHost(username))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Lobby));

@@ -1,6 +1,7 @@
 const { io } = require('../servers');
 const Game = require('../classes/Game');
 const {
+  sendAvailableGames,
   generateRandomCard,
   sanitizePlayer,
   isPlayerTurn,
@@ -9,13 +10,30 @@ const {
   colors
 } = require('./gameLogic.utils');
 
-function gameLogic(
-  currentGames,
-  socket,
-  sendAvailableGames,
-  username,
-  sendMessage
-) {
+function gameLogic(currentGames, socket, username, sendMessage) {
+  let currentRoomId = undefined;
+
+  socket.on('createGame', ({ maxPlayers, name }) => {
+    if (!maxPlayers || !name)
+      return sendMessage('Please provide all the info needed', true, socket);
+    const roomId = `${Math.floor(Math.random() * 9999) + 1}`;
+    const game = new Game(maxPlayers, name, roomId, username);
+    currentRoomId = roomId;
+
+    currentGames[roomId] = {
+      ...game,
+      hostSocket: socket.id
+    };
+    socket.join(`${roomId}`);
+    currentRoomId = roomId;
+
+    socket.emit('gameCreated', {
+      ...game,
+      isHost: true
+    });
+    sendAvailableGames(currentGames);
+  });
+
   socket.on('startGame', roomId => {
     if (
       currentGames[roomId] &&
@@ -24,7 +42,7 @@ function gameLogic(
     ) {
       const gameToStart = currentGames[roomId];
       gameToStart.inLobby = false;
-      sendAvailableGames();
+      sendAvailableGames(currentGames);
 
       gameToStart.players.forEach((player, idx) => {
         for (let i = 0; i < 7; i++) {
@@ -63,6 +81,7 @@ function gameLogic(
         return sendMessage('Please provide a password', true, socket);
       }
       socket.join(String(roomId));
+      currentRoomId = roomId;
       const player = {
         name: username,
         cards: 0,
@@ -78,14 +97,13 @@ function gameLogic(
         isHost: false
       });
 
-      return sendAvailableGames();
+      return sendAvailableGames(currentGames);
     }
     return sendMessage('This game does not exist', true, socket);
   });
 
   socket.on('playCard', ({ cardIndex, colorIndex }) => {
-    const roomId = Object.keys(socket.rooms)[0];
-    const currentGame = currentGames[roomId];
+    const currentGame = currentGames[currentRoomId];
     let { currentCard, players } = currentGame;
     const player = isPlayerTurn(currentGame, username);
     const playerIdx = currentGame.currentPlayerTurnIndex;
@@ -112,7 +130,7 @@ function gameLogic(
         player.name === username && player.cards.splice(cardIndex, 1);
       });
 
-      io.in(roomId).emit('cardPlayed', {
+      io.in(currentRoomId).emit('cardPlayed', {
         cardPlayerIndex: playerIdx,
         cardIndex,
         currentPlayerTurnIndex: currentGame.currentPlayerTurnIndex,
@@ -156,7 +174,7 @@ function gameLogic(
             ...players[playerToDrawIndex].cards,
             ...randomCards
           ];
-          io.to(roomId).clients((err, clients) => {
+          io.to(currentRoomId).clients((err, clients) => {
             clients.forEach(client => {
               const clientSocket = io.sockets.sockets[client];
               if (
@@ -184,8 +202,7 @@ function gameLogic(
   });
 
   socket.on('requestCard', () => {
-    const roomId = Object.keys(socket.rooms)[0];
-    const currentGame = currentGames[roomId];
+    const currentGame = currentGames[currentRoomId];
     let { currentCard, restrictDraw } = currentGame;
     const player = isPlayerTurn(currentGame, username);
     const playerIdx = currentGame.currentPlayerTurnIndex;
@@ -208,60 +225,94 @@ function gameLogic(
       playerIdx,
       randomCards: [randomCard]
     });
-    socket.to(String(roomId)).emit('drawnCard', { playerIdx, numCards: 1 });
+    socket
+      .to(String(currentRoomId))
+      .emit('drawnCard', { playerIdx, numCards: 1 });
   });
 
-  socket.on('leaveGame', () => {
-    const roomId = Object.keys(socket.rooms)[0];
+  const leaveRoom = roomId => {
     if (currentGames[roomId]) {
       const currentGame = currentGames[roomId];
       const players = currentGame.players;
       let playerIdx = players.findIndex(player => player.name === username);
-
-      if (playerIdx) {
+      if (playerIdx !== undefined) {
         currentGames[roomId].players.splice(playerIdx, 1);
+        currentGames[roomId].playerCount = currentGame.players.length;
 
         socket.leave(roomId, err => {
-          if (err) {
-            throw new Error(err);
-          }
+          if (err) throw new Error(err);
+
           console.log('player left room ', roomId);
         });
+        currentRoomId = undefined;
 
-        if (currentGame.hostSocket === socket.id) {
-          // handle the host leaving the session
-        }
+        new Promise(resolve => {
+          if (currentGame.hostSocket === socket.id && players.length > 0) {
+            const randomPlayer = Math.floor(
+              Math.random() * (currentGame.players.length - 1)
+            );
 
-        if (players.length === 1) {
-          players[0].cards = [];
-          const game = new Game(
-            currentGame.maxPlayers,
-            currentGame.name,
-            roomId,
-            currentGame.host,
-            players
-          );
-          currentGames[roomId] = {
-            ...game,
-            hostSocket: currentGame.hostSocket
-          };
-          sendAvailableGames();
-          return io.to(roomId).emit('gameFinished', { ...game, isHost: true });
-        }
+            io.to(roomId).clients((err, clients) => {
+              if (err) throw new Error(err);
+              const newHostSocket = io.sockets.sockets[clients[randomPlayer]];
+              const newHostName = newHostSocket.handshake.query.username;
 
-        let playerTurnIndex = currentGame.currentPlayerTurnIndex;
-        if (
-          playerTurnIndex === playerIdx &&
-          currentGame.players.length === playerTurnIndex
-        ) {
-          currentGame.currentPlayerTurnIndex = updateCurrentPlayerTurnIndex(
-            currentGame
-          );
-        }
+              currentGame.hostSocket = newHostSocket.id;
+              currentGame.host = newHostName;
+              currentGames[roomId] = currentGame;
+              newHostSocket.emit('newHost', newHostName);
+            });
+          }
+          resolve();
+        }).then(() => {
+          if (!currentGame.inLobby) {
+            if (players.length === 1) {
+              players[0].cards = [];
+              const game = new Game(
+                currentGame.maxPlayers,
+                currentGame.name,
+                roomId,
+                currentGame.host,
+                players
+              );
+              currentGames[roomId] = {
+                ...game,
+                hostSocket: currentGame.hostSocket
+              };
+              sendAvailableGames(currentGames);
+              return io
+                .to(roomId)
+                .emit('gameFinished', { ...game, isHost: true });
+            }
 
-        io.to(roomId).emit('playerLeave', playerIdx);
+            let playerTurnIndex = currentGame.currentPlayerTurnIndex;
+            if (
+              playerTurnIndex === playerIdx &&
+              currentGame.players.length === playerTurnIndex
+            ) {
+              currentGame.currentPlayerTurnIndex = updateCurrentPlayerTurnIndex(
+                currentGame
+              );
+            }
+          } else if (players.length === 0) {
+            delete currentGames[roomId];
+            return sendAvailableGames(currentGames);
+          }
+
+          sendAvailableGames(currentGames);
+          io.to(roomId).emit('playerLeave', playerIdx);
+        });
       }
     }
+  };
+
+  socket.on('leaveRoom', () => {
+    leaveRoom(currentRoomId);
+  });
+
+  socket.on('disconnect', reason => {
+    console.log(`Socket disconnected: ${reason}`);
+    leaveRoom(currentRoomId);
   });
 }
 
