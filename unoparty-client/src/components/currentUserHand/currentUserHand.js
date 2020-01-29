@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { useTransition } from 'react-spring';
@@ -9,6 +9,7 @@ import { selectSocketConnection } from '../../redux/socket/socket.selectors';
 
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
+import Button from 'react-bootstrap/Button';
 
 import './currentUserHand.styles.css';
 
@@ -31,12 +32,31 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
   const [colorSelectorData, setColorSelectorData] = useState(
     INITIAL_COLOR_SELECTOR_DATA
   );
+  const [toggleCallUnoButton, setToggleCallUnoButton] = useState(false);
   const player = currentGamePlayers.find(player => player.name === playerName);
+
+  useEffect(() => {
+    socket.on('unoButton', () => {
+      setToggleCallUnoButton(true);
+    });
+
+    socket.on('disableUnoButton', () => {
+      setToggleCallUnoButton(false);
+    });
+
+    return () => {
+      socket.off('unoButton');
+      socket.off('disableUnoButton');
+    };
+  }, [setToggleCallUnoButton, socket]);
 
   const playCard = (cardIndex, key) => {
     const playerCard = player.cards[cardIndex];
     if (!playerCard) {
       return alert('card does not exist');
+    }
+    if (toggleCallUnoButton) {
+      setToggleCallUnoButton(false);
     }
 
     const top =
@@ -70,6 +90,11 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
     socket.emit('playCard', { cardIndex });
   };
 
+  const callUno = () => {
+    socket.emit('callUno');
+    setToggleCallUnoButton(false);
+  };
+
   const transitions = useTransition(
     player.cards,
     cards => cards.key,
@@ -88,6 +113,17 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
             setColorSelectorData(INITIAL_COLOR_SELECTOR_DATA)
           }
         />
+      )}
+      {toggleCallUnoButton && (
+        <div>
+          <Button
+            onClick={() => callUno()}
+            style={{ height: '50px' }}
+            variant="secondary"
+          >
+            Call Uno
+          </Button>
+        </div>
       )}
       <Col className="current-user-hand fixed-bottom" sm="12">
         {transitions.map(({ item, props, key }, idx) => {

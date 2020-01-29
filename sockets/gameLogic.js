@@ -7,7 +7,8 @@ const {
   isPlayerTurn,
   updateCurrentPlayerTurnIndex,
   canPlayCard,
-  colors
+  colors,
+  finishGame
 } = require('./gameLogic.utils');
 
 function gameLogic(currentGames, socket, username, sendMessage) {
@@ -85,7 +86,8 @@ function gameLogic(currentGames, socket, username, sendMessage) {
       const player = {
         name: username,
         cards: 0,
-        score: 0
+        score: 0,
+        uno: false
       };
 
       io.to(String(roomId)).emit('playerJoin', player);
@@ -107,7 +109,6 @@ function gameLogic(currentGames, socket, username, sendMessage) {
     let { currentCard, players } = currentGame;
     const player = isPlayerTurn(currentGame, username);
     const playerIdx = currentGame.currentPlayerTurnIndex;
-
     if (!player) {
       return sendMessage('Error playing card', true, socket);
     }
@@ -124,6 +125,56 @@ function gameLogic(currentGames, socket, username, sendMessage) {
       );
       if (currentGame.restrictDraw) currentGame.restrictDraw = false;
 
+      if (player.cards.length === 1) {
+        if (!player.uno) {
+          const randomCards = [];
+          for (let i = 0; i < 2; i++) {
+            randomCards.push(generateRandomCard());
+          }
+          currentGame.players[playerIdx].cards = [
+            ...currentGame.players[playerIdx].cards,
+            ...randomCards
+          ];
+          socket.emit('disableUnoButton');
+          socket.emit('drawnCard', {
+            playerIdx,
+            randomCards
+          });
+          socket.to(currentRoomId).emit('drawnCard', {
+            playerIdx,
+            numCards: randomCards.length
+          });
+        } else {
+          const playersWithCardsLeft = currentGame.players.filter(
+            player => player.cards.length > 0
+          ).length;
+
+          if (playersWithCardsLeft === 2) {
+            const finishedGame = finishGame(currentGames, currentRoomId);
+            currentGames[currentRoomId] = {
+              ...finishedGame,
+              hostSocket: currentGame.hostSocket
+            };
+
+            sendAvailableGames(currentGames);
+            io.to(currentRoomId).clients((err, clients) => {
+              if (err) throw new Error(err);
+
+              return clients.forEach(client => {
+                const clientSocket = io.sockets.sockets[client];
+                clientSocket.id === currentGame.hostSocket
+                  ? clientSocket.emit('gameFinished', {
+                      ...finishedGame,
+                      isHost: true
+                    })
+                  : io.to(currentRoomId).emit('gameFinished', finishedGame);
+              });
+            });
+          }
+        }
+        currentGame.players[playerIdx].uno = false;
+      }
+
       currentGame.currentCard = card;
       console.log(`${username} played ${JSON.stringify(card)}`);
       players.find(player => {
@@ -136,6 +187,9 @@ function gameLogic(currentGames, socket, username, sendMessage) {
         currentPlayerTurnIndex: currentGame.currentPlayerTurnIndex,
         currentCard: card
       });
+      if (player.cards.length === 1) {
+        socket.emit('unoButton');
+      }
     };
 
     if (canPlayCard(cardToPlay, currentCard)) {
@@ -210,6 +264,9 @@ function gameLogic(currentGames, socket, username, sendMessage) {
     if (!player || restrictDraw) {
       return sendMessage('Error drawing card', true, socket);
     }
+    player.uno
+      ? (currentGame.players[playerIdx].uno = false)
+      : socket.emit('disableUnoButton');
 
     const randomCard = generateRandomCard();
     if (!canPlayCard(randomCard, currentCard)) {
@@ -228,6 +285,21 @@ function gameLogic(currentGames, socket, username, sendMessage) {
     socket
       .to(String(currentRoomId))
       .emit('drawnCard', { playerIdx, numCards: 1 });
+  });
+
+  socket.on('callUno', () => {
+    const currentGame = currentGames[currentRoomId];
+    const playerIdx = currentGame.players.findIndex(
+      player => player.name === username
+    );
+    const player = currentGame.players[playerIdx];
+    if (player && player.cards.length === 1 && !player.uno) {
+      currentGames[currentRoomId].players[playerIdx].uno = true;
+      socket.emit('unoCalled', { playerIdx, username });
+      console.log(username, 'called uno!');
+    } else {
+      sendMessage('You are not able to call uno at this time', true, socket);
+    }
   });
 
   const leaveRoom = roomId => {
@@ -267,22 +339,15 @@ function gameLogic(currentGames, socket, username, sendMessage) {
         }).then(() => {
           if (!currentGame.inLobby) {
             if (players.length === 1) {
-              players[0].cards = [];
-              const game = new Game(
-                currentGame.maxPlayers,
-                currentGame.name,
-                roomId,
-                currentGame.host,
-                players
-              );
+              const finishedGame = finishGame(currentGames, roomId);
               currentGames[roomId] = {
-                ...game,
+                ...finishedGame,
                 hostSocket: currentGame.hostSocket
               };
               sendAvailableGames(currentGames);
               return io
                 .to(roomId)
-                .emit('gameFinished', { ...game, isHost: true });
+                .emit('gameFinished', { ...finishedGame, isHost: true });
             }
 
             let playerTurnIndex = currentGame.currentPlayerTurnIndex;

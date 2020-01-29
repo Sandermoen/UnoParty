@@ -1,5 +1,3 @@
-<a href="http://fvcproductions.com"></a>
-
 # UnoParty
 
 > An uno game made with react, express and socket.io
@@ -18,13 +16,15 @@
 
 ### Setup
 
-> install all necessary npm packages
+> Install all necessary npm packages
 
 ```shell
 $ npm install
+$ cd unoparty-client
+$ npm install
 ```
 
-> now run the project from the root folder with npm run dev
+> Now run the project from the root folder with npm run dev
 
 ```shell
 $ npm run dev

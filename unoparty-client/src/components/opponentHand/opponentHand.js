@@ -16,7 +16,7 @@ import PlayerAvatar from '../playerAvatar/playerAvatar';
 const OpponentHand = ({ currentGame: { players }, playerName }) => {
   const renderOpponentCards = () => {
     const cards = players
-      .filter(player => player.name !== playerName)
+      .filter(player => player.name !== playerName && player.cards > 0)
       .map((player, idx) => {
         let cards = [];
         for (let i = 0; i < player.cards; i++) {
@@ -38,31 +38,7 @@ const OpponentHand = ({ currentGame: { players }, playerName }) => {
     return cards;
   };
 
-  return (
-    <Row className="opponent-hand-container">
-      {renderOpponentCards()}
-      {/* {players.filter((player, idx) => {
-        if (player.name !== playerName) {
-          let cards = [];
-          for (let i = 0; i < player.cards; i++) {
-            cards.push(<UnoCardBackside key={i} />);
-          }
-          return (
-            <Col key={idx} className="opponent-hand-col">
-              <div className="opponent-hand">
-                <PlayerAvatar
-                  additionalStyles={{ margin: '0 auto', marginBottom: '10px' }}
-                >
-                  {player.name}
-                </PlayerAvatar>
-                <div className="opponent-hand-cards">{cards}</div>
-              </div>
-            </Col>
-          );
-        }
-      })} */}
-    </Row>
-  );
+  return <Row className="opponent-hand-container">{renderOpponentCards()}</Row>;
 };
 
 const mapStateToProps = createStructuredSelector({

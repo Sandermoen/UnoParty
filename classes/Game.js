@@ -13,7 +13,8 @@ class Game {
           {
             name: host,
             cards: [],
-            score: 0
+            score: 0,
+            uno: false
           }
         ];
     this.currentPlayerTurnIndex = 0;

@@ -143,17 +143,35 @@ const canPlayCard = (cardToPlay, currentCard) => {
 
 const updateCurrentPlayerTurnIndex = currentGame => {
   let { currentPlayerTurnIndex, players } = currentGame;
-  if (currentGame.turnReverse) {
-    currentPlayerTurnIndex - 1 < 0
-      ? (currentPlayerTurnIndex = players.length - 1)
-      : (currentPlayerTurnIndex -= 1);
-  } else {
-    currentPlayerTurnIndex + 1 > players.length - 1
-      ? (currentPlayerTurnIndex = 0)
-      : (currentPlayerTurnIndex += 1);
+  let playerCards = null;
+  while (!playerCards) {
+    if (currentGame.turnReverse) {
+      currentPlayerTurnIndex - 1 < 0
+        ? (currentPlayerTurnIndex = players.length - 1)
+        : (currentPlayerTurnIndex -= 1);
+      playerCards = players[currentPlayerTurnIndex].cards.length;
+    } else {
+      currentPlayerTurnIndex + 1 > players.length - 1
+        ? (currentPlayerTurnIndex = 0)
+        : (currentPlayerTurnIndex += 1);
+      playerCards = players[currentPlayerTurnIndex].cards.length;
+    }
   }
   console.log('current turn index: ', currentPlayerTurnIndex);
   return currentPlayerTurnIndex;
+};
+
+const finishGame = (currentGames, roomId) => {
+  const currentGame = currentGames[roomId];
+  const players = currentGame.players.map(player => ({ ...player, cards: [] }));
+  const game = new Game(
+    currentGame.maxPlayers,
+    currentGame.name,
+    roomId,
+    currentGame.host,
+    players
+  );
+  return game;
 };
 
 module.exports = {
@@ -163,5 +181,6 @@ module.exports = {
   isPlayerTurn,
   canPlayCard,
   updateCurrentPlayerTurnIndex,
-  colors
+  colors,
+  finishGame
 };
