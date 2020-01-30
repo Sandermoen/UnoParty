@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import axios from 'axios';
 
 import { setPlayerName } from '../../redux/player/player.actions';
 import { setSocket } from '../../redux/socket/socket.actions';
@@ -13,18 +14,31 @@ import Button from 'react-bootstrap/Button';
 
 import CustomJumbotron from '../customJumbotron/customJumbotron';
 
-const LoginForm = ({ setSocket, setPlayerName }) => {
+const LoginForm = ({ setSocket, setPlayerName, setAlert }) => {
   const [username, setUsername] = useState('');
 
   const handleClick = async event => {
     event.preventDefault();
     if (!username) {
-      return alert('empty username');
+      return setAlert({ message: 'Please enter a username' });
+    } else if (username.length <= 3) {
+      return setAlert({
+        message: 'Please choose a username longer than 3 characters'
+      });
     }
-    setPlayerName(username);
-    import('../../socket.io/socketConnection').then(socket => {
-      return setSocket(socket.default(username));
-    });
+    axios
+      .post('/auth', {
+        username
+      })
+      .then(() => {
+        setPlayerName(username);
+        import('../../socket.io/socketConnection').then(socket => {
+          return setSocket(socket.default(username));
+        });
+      })
+      .catch(err => {
+        setAlert({ message: err.response.data });
+      });
   };
 
   return (

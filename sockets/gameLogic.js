@@ -1,5 +1,7 @@
 const { io } = require('../servers');
 const Game = require('../classes/Game');
+const User = require('../models/User');
+const uniqid = require('uniqid');
 const {
   sendAvailableGames,
   generateRandomCard,
@@ -17,7 +19,7 @@ function gameLogic(currentGames, socket, username, sendMessage) {
   socket.on('createGame', ({ maxPlayers, name }) => {
     if (!maxPlayers || !name)
       return sendMessage('Please provide all the info needed', true, socket);
-    const roomId = `${Math.floor(Math.random() * 9999) + 1}`;
+    const roomId = uniqid();
     const game = new Game(maxPlayers, name, roomId, username);
     currentRoomId = roomId;
 
@@ -313,7 +315,6 @@ function gameLogic(currentGames, socket, username, sendMessage) {
 
         socket.leave(roomId, err => {
           if (err) throw new Error(err);
-
           console.log('player left room ', roomId);
         });
         currentRoomId = undefined;
@@ -375,9 +376,12 @@ function gameLogic(currentGames, socket, username, sendMessage) {
     leaveRoom(currentRoomId);
   });
 
-  socket.on('disconnect', reason => {
+  socket.on('disconnect', async reason => {
     console.log(`Socket disconnected: ${reason}`);
     leaveRoom(currentRoomId);
+    await User.deleteOne({ username: username }, err => {
+      if (err) throw new Error(err);
+    });
   });
 }
 

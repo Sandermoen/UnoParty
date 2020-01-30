@@ -21,8 +21,11 @@ const Deck = ({ currentGame: { currentCard }, socket }) => {
   useEffect(() => {
     if (!currentDeckCard) {
       return setCurrentDeckCard(currentCard);
+    } else {
+      setTimeout(() => {
+        setCurrentDeckCard(currentCard);
+      }, 500);
     }
-    setTimeout(() => setCurrentDeckCard(currentCard), 500);
   }, [currentCard, setCurrentDeckCard, currentDeckCard]);
 
   return (

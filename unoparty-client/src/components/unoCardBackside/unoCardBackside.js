@@ -1,5 +1,4 @@
 import React from 'react';
-
 import '../unoCard/unoCard.styles.css';
 import './unoCardBackside.styles.css';
 
@@ -8,7 +7,7 @@ const UnoCardBackside = ({ additionalStyles, drawCard }) => {
     <div
       onClick={drawCard}
       style={{ ...additionalStyles }}
-      className="uno-card backside"
+      className={`uno-card backside`}
     >
       <div className="uno-card-middle">
         <div className="uno-card-backside-middle-circle">

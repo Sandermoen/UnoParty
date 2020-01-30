@@ -1,0 +1,8 @@
+.custom-alert {
+  padding: 20px 40px;
+  position: absolute;
+  color: white;
+  background: #dc3545;
+  border-radius: 5px;
+  z-index: 9999;
+}
