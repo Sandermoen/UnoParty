@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const socketio = require('socket.io');
 const mongoose = require('mongoose');
 const apiRouter = require('./api/api');
-const enforce = require('enforce');
+const enforce = require('express-sslify');
 const compression = require('compression');
 const path = require('path');
 
