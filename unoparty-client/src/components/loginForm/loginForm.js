@@ -27,7 +27,7 @@ const LoginForm = ({ setSocket, setPlayerName, setAlert }) => {
       });
     }
     axios
-      .post('/auth', {
+      .post('/api/auth', {
         username
       })
       .then(() => {
