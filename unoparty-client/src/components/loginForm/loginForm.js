@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import axios from 'axios';
+import { createStructuredSelector } from 'reselect';
 
 import { setPlayerName } from '../../redux/player/player.actions';
 import { setSocket } from '../../redux/socket/socket.actions';
+
+import { selectPlayerStatus } from '../../redux/player/player.selector';
 
 import './loginForm.styles.css';
 
@@ -14,8 +16,17 @@ import Button from 'react-bootstrap/Button';
 
 import CustomJumbotron from '../customJumbotron/customJumbotron';
 
-const LoginForm = ({ setSocket, setPlayerName, setAlert }) => {
+const LoginForm = ({ setSocket, setPlayerName, setAlert, playerStatus }) => {
   const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    playerStatus.state === 'success' &&
+      import('../../socket.io/socketConnection').then(socket =>
+        setSocket(socket.default(username))
+      );
+
+    playerStatus.error && setAlert({ message: playerStatus.state });
+  }, [playerStatus, setSocket, setAlert]);
 
   const handleClick = async event => {
     event.preventDefault();
@@ -26,19 +37,8 @@ const LoginForm = ({ setSocket, setPlayerName, setAlert }) => {
         message: 'Please choose a username longer than 3 characters'
       });
     }
-    axios
-      .post('/api/auth', {
-        username
-      })
-      .then(() => {
-        setPlayerName(username);
-        import('../../socket.io/socketConnection').then(socket => {
-          return setSocket(socket.default(username));
-        });
-      })
-      .catch(err => {
-        setAlert({ message: err.response.data });
-      });
+
+    setPlayerName(username);
   };
 
   return (
@@ -73,4 +73,8 @@ const mapDispatchToProps = dispatch => ({
   setSocket: socket => dispatch(setSocket(socket))
 });
 
-export default connect(null, mapDispatchToProps)(LoginForm);
+const mapStateToProps = createStructuredSelector({
+  playerStatus: selectPlayerStatus
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);

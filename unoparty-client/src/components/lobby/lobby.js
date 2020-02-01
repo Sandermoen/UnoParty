@@ -35,7 +35,6 @@ const Lobby = ({
   socket,
   clearCurrentGame,
   removePlayer,
-  playerName,
   setCurrentGameHost
 }) => {
   const { maxPlayers, name, players, host, isHost, roomId } = currentGame;

@@ -6,3 +6,8 @@ export const selectPlayerName = createSelector(
   [selectPlayer],
   player => player.name
 );
+
+export const selectPlayerStatus = createSelector(
+  [selectPlayer],
+  player => player.status
+);
